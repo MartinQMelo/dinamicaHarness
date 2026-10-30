@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { carregarRegras, criarAdmin, criarUsuario, gravarComoDono, lerComoDono } from './emulador.js';
+import { carregarRegras, criarAdmin, criarUsuario, lerComoDono, semearSala } from './emulador.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.14.1';
 
@@ -36,14 +36,6 @@ async function comoAnonimo(page, operacao, caminho, valor) {
       return /permission.denied/i.test(msg) ? 'PERMISSION_DENIED' : msg;
     }
   }, { SDK, operacao, caminho, valor });
-}
-
-async function semearSala(codigo) {
-  await gravarComoDono(`salas/${codigo}`, {
-    estado: { fase: 'lobby', timerFim: 0, atualizadoEm: 1 },
-    config: { tamanhoGrupo: 5, frase: 'x' },
-    segredo: { criterios: { c1: 'critério secreto' } },
-  });
 }
 
 test.describe('F02 · login do apresentador e criação de sala', () => {

@@ -33,7 +33,7 @@
         "O celular mostra a cor e o nome do grupo e os colegas",
         "Recarregar a página mantém o aluno no mesmo grupo"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F04",

@@ -17,6 +17,24 @@
         },
         "config": {
           ".read": "auth != null"
+        },
+        "alunos": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('salas').child($sala).child('estado').exists()",
+            ".validate": "newData.hasChildren(['nome', 'grupo']) && newData.child('nome').isString() && newData.child('nome').val().length >= 1 && newData.child('nome').val().length <= 30 && newData.child('grupo').isString() && root.child('salas').child($sala).child('grupos').child(newData.child('grupo').val()).child('membros').child($uid).val() === true"
+          }
+        },
+        "grupos": {
+          ".read": "auth != null",
+          "$gid": {
+            ".write": "auth != null && newData.child('membros').child(auth.uid).val() === true && !data.child('membros').child(auth.uid).exists() && ((data.exists() && newData.child('cor').val() === data.child('cor').val() && newData.child('nome').val() === data.child('nome').val() && newData.child('ordem').val() === data.child('ordem').val()) || (!data.exists() && root.child('salas').child($sala).child('estado/fase').val() === 'lobby' && newData.child('cor').isString() && newData.child('nome').isString() && newData.child('ordem').isNumber()))",
+            "membros": {
+              "$uid": {
+                ".validate": "newData.val() === true && ($uid === auth.uid || data.val() === true || (auth.token.email != null && root.child('admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true))"
+              }
+            }
+          }
         }
       }
     }

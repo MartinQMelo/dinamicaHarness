@@ -69,3 +69,18 @@ button.secundario { background: #e1e4e8; color: #1b1e24; padding: 4px 10px; }
 .codigo-sala { font-size: 2rem; letter-spacing: 0.15em; }
 
 #link-aluno { word-break: break-all; }
+
+h2 { font-size: 1.1rem; margin: 20px 0 8px; }
+
+.cartao-grupo {
+  border-radius: 12px;
+  padding: 24px 16px;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.lista-colegas { padding-left: 20px; margin: 0; }
+.lista-colegas li { padding: 2px 0; }

@@ -10,11 +10,37 @@
 <body>
   <main>
     <h1>Você é o agente</h1>
-    <p>Aguarde o apresentador.</p>
+
+    <section id="tela-sem-sala" hidden>
+      <p id="mensagem-sem-sala">Abra o link ou o QR code mostrado no telão.</p>
+    </section>
+
+    <section id="tela-entrada" hidden>
+      <p>Sala <strong id="codigo-sala"></strong></p>
+      <form id="form-entrada" class="formulario">
+        <label for="nome">Seu nome</label>
+        <input id="nome" type="text" maxlength="30" autocomplete="given-name" required>
+        <button id="botao-entrar" type="submit">Entrar</button>
+        <p id="erro-entrada" class="erro" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="tela-grupo" hidden>
+      <p>Olá, <strong id="aluno-nome"></strong>! Você está no grupo:</p>
+      <div id="cartao-grupo" class="cartao-grupo">
+        <span id="grupo-nome"></span>
+      </div>
+      <h2>Seus colegas de agente</h2>
+      <ul id="lista-colegas" class="lista-colegas"></ul>
+      <p id="sem-colegas">Por enquanto só você. Aguarde os colegas.</p>
+      <p>Aguarde o apresentador começar.</p>
+    </section>
   </main>
   <script type="module">
     import { acompanharConexao } from './js/conexao.js';
+    import { iniciarAluno } from './js/aluno.js';
     acompanharConexao();
+    iniciarAluno();
   </script>
 </body>
 </html>

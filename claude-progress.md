@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 e F02 prontas e verificadas (passes: true). Próximo passo: feature F03 (entrada dos alunos
-e distribuição automática em grupos).
+F01, F02 e F03 prontas e verificadas (passes: true). Próximo passo: feature F04 (telão no
+lobby: QR code, link, contagem ao vivo).
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,30 @@ e distribuição automática em grupos).
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F03
+- Feito: site/js/grupos.js (paleta Azul…Vermelho, depois "Azul 2"; gid = g1, g2…;
+  escolherGrupo: no lobby, o grupo não cheio com menos membros, ou um novo se todos cheios; fora
+  do lobby, o menor, sem criar). site/js/aluno.js + index.html: lê ?sala=, Auth anônimo, form de
+  nome (até 30), transação em grupos/{gid} e depois grava alunos/{uid} {nome, grupo, entrouEm}.
+  Mostra o cartão na cor do grupo, o nome do grupo e os colegas ao vivo. Ao recarregar, se
+  alunos/{uid} existe, vai direto para o grupo. Sala inexistente mostra um aviso. Regras novas:
+  alunos/{uid} só o próprio (nome 1..30 e precisa ser membro do grupo informado); grupos lidos
+  por qualquer autenticado.
+- Como verifiquei: npm test 19/19 (6 novos em tests/f03-alunos.spec.js; o dos 12 alunos entra
+  com os 12 ao mesmo tempo, em contextos separados, e confere 5/5/2, nomes, cores, a cor do cartão
+  e os colegas em cada celular). Rodei o arquivo da F03 mais 2 vezes, sem falha intermitente.
+- Problemas / decisões: a especificação diz que só o apresentador escreve em `grupos`, mas a
+  distribuição automática exige que o aluno se coloque no grupo. Regra adotada: o aluno só pode
+  ADICIONAR A SI MESMO em grupos/{gid}/membros, sem mudar cor/nome/ordem; criar grupo só no lobby.
+  O resto continua só do admin. Lacuna conhecida: as regras não contam filhos, então não conseguem
+  impedir que um aluno malicioso, na mesma escrita em que se adiciona, remova outro membro, nem
+  que passe do limite do grupo. O limite é garantido pela transação no cliente.
+  Transação do RTDB: a 1ª chamada recebe o cache local (pode ser null mesmo com o grupo existindo);
+  por isso, com null, a função sempre propõe a criação e o servidor reexecuta com o valor real.
+  O fluxo de quem entra atrasado (fora do lobby) já está no código, mas o teste é da F13.
+- Próximo passo: F04. Reaproveitar grupos.js no telão. Para a contagem, alunos e grupos já são
+  legíveis por qualquer autenticado (o telão faz login anônimo).
 
 ### 2026-10-30 · Ajuste do modelo: critérios com chaves c1..c5
 - Feito: a pedido do apresentador, as chaves dos critérios passaram de 1..5 para c1..c5 em todo o

@@ -44,3 +44,12 @@ export async function criarAdmin() {
   await gravarComoDono(`admins/${email.replaceAll('.', ',')}`, true);
   return { email, senha };
 }
+
+// Cria (ou zera) uma sala pronta para receber alunos.
+export async function semearSala(codigo, { fase = 'lobby', tamanhoGrupo = 5 } = {}) {
+  await gravarComoDono(`salas/${codigo}`, {
+    estado: { fase, timerFim: 0, atualizadoEm: 1 },
+    config: { tamanhoGrupo, frase: 'Monte a tela inicial de um app de caronas para alunos da UnB.' },
+    segredo: { criterios: { c1: 'critério secreto' } },
+  });
+}
