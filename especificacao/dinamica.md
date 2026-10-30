@@ -61,17 +61,19 @@ admins/{emailCodificado}: true              # e-mail com "." trocado por "," (ex
 salas/{sala}/
   estado: { fase, timerFim, atualizadoEm, vencedor? }   # vencedor: gid escolhido pelo controle no fim
   config: { tamanhoGrupo, frase, criterios? } # criterios só existe da r1_avaliacao em diante
-  segredo: { criterios }                     # leitura e escrita só do apresentador
+  segredo: { criterios: {c1..c5: texto} }    # leitura e escrita só do apresentador
   alunos/{uid}: { nome, grupo, entrouEm }
   grupos/{gid}: { cor, nome, ordem, membros: {uid: true} }
   telas/{tid}: { rodada, autor: gid, dono: gid, componentes: [ {tipo, texto, editandoPor?} ],
                  progresso, saiu?: { por: uid, em: timestamp },
-                 declarados: {1..5: bool}, avaliacaoR1: {1..5: bool},
-                 revisao: { revisor: gid, aprovados: {1..5: bool}, enviadoEm } }
+                 declarados: {c1..c5: bool}, avaliacaoR1: {c1..c5: bool},
+                 revisao: { revisor: gid, aprovados: {c1..c5: bool}, enviadoEm } }
   trocas/{fase}: { tid: donoAntes }          # gravado a cada troca, para "voltar fase" desfazer
   oficina/{gid}: { projeto, agents, features: [ {nome, aceite, evidencia} ], progresso }
   votos/{uid}: gid
 ```
+As chaves dos critérios são `c1`..`c5` (não `1`..`5`): chaves numéricas fazem o Realtime Database devolver uma lista com `null` na posição 0.
+
 A troca de sessão é uma única atualização multi-caminho feita pelo controle, mudando `dono` de todas as telas e a `fase` juntos (e gravando `trocas/{fase}`).
 
 ## Segurança (regras em `database.rules.json`)

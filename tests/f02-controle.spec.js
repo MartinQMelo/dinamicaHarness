@@ -42,7 +42,7 @@ async function semearSala(codigo) {
   await gravarComoDono(`salas/${codigo}`, {
     estado: { fase: 'lobby', timerFim: 0, atualizadoEm: 1 },
     config: { tamanhoGrupo: 5, frase: 'x' },
-    segredo: { criterios: { 1: 'critério secreto' } },
+    segredo: { criterios: { c1: 'critério secreto' } },
   });
 }
 
@@ -93,9 +93,10 @@ test.describe('F02 · login do apresentador e criação de sala', () => {
     expect(typeof gravada.estado.atualizadoEm).toBe('number');
     expect(gravada.config.tamanhoGrupo).toBe(5);
     expect(gravada.config.criterios).toBeUndefined();
-    // O banco guarda chaves 1..5 como array com null na posição 0.
-    expect(Object.values(gravada.segredo.criterios).filter(Boolean)).toHaveLength(5);
-    expect(gravada.segredo.criterios[1]).toContain('Oferecer carona');
+    // Chaves c1..c5: o banco devolve um objeto, não uma lista.
+    expect(Array.isArray(gravada.segredo.criterios)).toBe(false);
+    expect(Object.keys(gravada.segredo.criterios)).toEqual(['c1', 'c2', 'c3', 'c4', 'c5']);
+    expect(gravada.segredo.criterios.c1).toContain('Oferecer carona');
     expect(erros).toEqual([]);
   });
 
@@ -105,12 +106,12 @@ test.describe('F02 · login do apresentador e criação de sala', () => {
     expect(await comoAnonimo(page, 'gravar', 'salas/RGRA/estado/fase', 'r1')).toBe('PERMISSION_DENIED');
     expect(await comoAnonimo(page, 'gravar', 'salas/RGRA/estado', { fase: 'r1' })).toBe('PERMISSION_DENIED');
     expect(await comoAnonimo(page, 'atualizar', 'salas/RGRA', { 'estado/fase': 'r1' })).toBe('PERMISSION_DENIED');
-    expect(await comoAnonimo(page, 'gravar', 'salas/RGRA/segredo/criterios', { 1: 'hack' })).toBe('PERMISSION_DENIED');
+    expect(await comoAnonimo(page, 'gravar', 'salas/RGRA/segredo/criterios', { c1: 'hack' })).toBe('PERMISSION_DENIED');
     expect(await comoAnonimo(page, 'gravar', 'salas/NOVA/estado', { fase: 'lobby' })).toBe('PERMISSION_DENIED');
 
     const sala = await lerComoDono('salas/RGRA');
     expect(sala.estado.fase).toBe('lobby');
-    expect(sala.segredo.criterios[1]).toBe('critério secreto');
+    expect(sala.segredo.criterios.c1).toBe('critério secreto');
     expect(await lerComoDono('salas/NOVA')).toBeNull();
   });
 
@@ -130,8 +131,8 @@ test.describe('F02 · login do apresentador e criação de sala', () => {
     const resultado = await page.evaluate(async (SDK) => {
       const { db } = await import(new URL('js/firebase-config.js', location.href).href);
       const { ref, get, set } = await import(`${SDK}/firebase-database.js`);
-      await set(ref(db, 'salas/RGRC/segredo/criterios/1'), 'novo');
-      return (await get(ref(db, 'salas/RGRC/segredo/criterios/1'))).val();
+      await set(ref(db, 'salas/RGRC/segredo/criterios/c1'), 'novo');
+      return (await get(ref(db, 'salas/RGRC/segredo/criterios/c1'))).val();
     }, SDK);
     expect(resultado).toBe('novo');
   });

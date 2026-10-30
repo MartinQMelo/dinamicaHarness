@@ -10,11 +10,11 @@ import { auth, db } from './firebase-config.js';
 export const FRASE_R1 = 'Monte a tela inicial de um app de caronas para alunos da UnB.';
 export const TAMANHO_GRUPO_PADRAO = 5;
 export const CRITERIOS_PADRAO = {
-  1: 'O botão "Oferecer carona" é o primeiro componente da tela.',
-  2: 'A lista de caronas mostra horário e ponto de saída em cada item (ex.: "18h · ICC Norte").',
-  3: 'Existe um filtro por campus com Darcy Ribeiro, Gama, Ceilândia e Planaltina.',
-  4: 'Não há componente de Chat nem de Pagamento (fora do escopo).',
-  5: 'A tela tem no máximo 6 componentes.',
+  c1: 'O botão "Oferecer carona" é o primeiro componente da tela.',
+  c2: 'A lista de caronas mostra horário e ponto de saída em cada item (ex.: "18h · ICC Norte").',
+  c3: 'Existe um filtro por campus com Darcy Ribeiro, Gama, Ceilândia e Planaltina.',
+  c4: 'Não há componente de Chat nem de Pagamento (fora do escopo).',
+  c5: 'A tela tem no máximo 6 componentes.',
 };
 
 const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // sem I e O, que confundem com 1 e 0
