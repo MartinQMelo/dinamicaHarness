@@ -1,9 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 implementada mas AINDA NÃO VERIFICADA (passes: false): a máquina não tinha node nem java,
-então ./init.sh e npm test não rodaram. Próximo passo: instalar Node 20+ e Java 11+, rodar
-./init.sh e npm test, corrigir o que falhar e só então marcar F01 como true.
+F01 pronta e verificada (passes: true). Próximo passo: feature F02 (login do apresentador,
+criação de sala e regras do banco).
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -13,6 +12,16 @@ então ./init.sh e npm test não rodaram. Próximo passo: instalar Node 20+ e Ja
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F01 (verificação)
+- Feito: init.sh agora também espera a porta 9099 (Auth) antes do teste de fumaça; o Auth sobe
+  alguns segundos depois do banco e o teste falhava com ECONNREFUSED 127.0.0.1:9099. Espera
+  máxima subiu de 30 s para 60 s. package-lock.json commitado. F01 marcada como true.
+- Como verifiquei: parei emuladores e servidor (portas 9000, 9099 e 5173 livres), rodei
+  ./init.sh do zero (6/6 do @fumaca passaram) e depois npm test (6/6).
+- Problemas / decisões: cuidado com `pkill -f` usando um padrão que aparece na própria linha de
+  comando: ele mata o shell que o chamou. Use `pkill -f "[f]irebase emulators:start"`.
+- Próximo passo: F02.
 
 ### 2026-10-30 · Feature F01 (parcial, não verificada)
 - Feito: decisões do apresentador registradas em especificacao/dinamica.md ("Decisões" e modelo de

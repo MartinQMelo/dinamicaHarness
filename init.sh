@@ -25,8 +25,8 @@ if ! curl -s localhost:5173 >/dev/null 2>&1; then
   nohup npm run serve > .servidor.log 2>&1 &
 fi
 
-for i in $(seq 1 30); do
-  if curl -s localhost:9000 >/dev/null 2>&1 && curl -s localhost:5173 >/dev/null 2>&1; then
+for i in $(seq 1 60); do
+  if curl -s localhost:9000 >/dev/null 2>&1 && curl -s localhost:9099 >/dev/null 2>&1 && curl -s localhost:5173 >/dev/null 2>&1; then
     echo "OK: emuladores em localhost:9000 (banco) e 9099 (auth); site em http://localhost:5173"
     echo "== Teste de fumaça =="
     npm test -- --grep @fumaca || { echo "ERRO: teste de fumaça falhou. Conserte antes de seguir."; exit 1; }

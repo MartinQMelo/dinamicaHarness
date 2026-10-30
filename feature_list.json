@@ -11,7 +11,7 @@
         "site/js/firebase-config.js conecta nos emuladores quando o host é localhost",
         ".github/workflows/pages.yml publica a pasta site/ no GitHub Pages"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F02",
