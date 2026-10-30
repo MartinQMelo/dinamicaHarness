@@ -1,0 +1,163 @@
+{
+  "projeto": "Dinâmica 'Você é o agente'",
+  "regra": "Só mude passes para true depois que npm test passar com testes que cobrem cada step. Nunca edite description ou steps.",
+  "features": [
+    {
+      "id": "F01",
+      "description": "Esqueleto do projeto: site/ estático, Firebase via CDN, emuladores configurados, Playwright rodando um teste de fumaça, workflow do GitHub Pages.",
+      "steps": [
+        "./init.sh sobe os emuladores de Auth e Realtime Database e o servidor em localhost:5173",
+        "npm test roda pelo menos um teste que abre index.html, telao.html e controle.html sem erro no console",
+        "site/js/firebase-config.js conecta nos emuladores quando o host é localhost",
+        ".github/workflows/pages.yml publica a pasta site/ no GitHub Pages"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F02",
+      "description": "Login do apresentador e criação de sala no controle, com regras do banco protegendo estado e config.",
+      "steps": [
+        "Apresentador faz login com e-mail e senha no controle.html",
+        "Botão 'Criar sala' gera um código de 4 letras e grava salas/{sala}/estado com fase lobby",
+        "Teste de regras: usuário anônimo não consegue escrever em salas/{sala}/estado nem em segredo",
+        "Teste de regras: usuário anônimo não consegue ler salas/{sala}/segredo"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F03",
+      "description": "Entrada dos alunos e distribuição automática em grupos.",
+      "steps": [
+        "Aluno abre index.html?sala=XXXX, digita o nome e entra com Auth anônimo",
+        "Com tamanho de grupo 5, 12 alunos entrando resultam em 3 grupos com 5, 5 e 2 membros, cada um com cor e nome",
+        "O celular mostra a cor e o nome do grupo e os colegas",
+        "Recarregar a página mantém o aluno no mesmo grupo"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F04",
+      "description": "Telão no lobby: QR code, link, contagem de alunos e grupos ao vivo.",
+      "steps": [
+        "telao.html?sala=XXXX mostra um QR code que aponta para index.html?sala=XXXX",
+        "A contagem de alunos e a lista de grupos atualizam sem recarregar quando alunos entram",
+        "Textos do telão legíveis: números com no mínimo 32 px"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F05",
+      "description": "Editor de tela compartilhado da rodada 1, com renderização reutilizável.",
+      "steps": [
+        "Na fase r1, o celular mostra a frase da tarefa e o editor com a moldura de celular",
+        "Dá para adicionar, editar o texto, mover e remover componentes dos 10 tipos do catálogo",
+        "Dois alunos do mesmo grupo veem as edições um do outro em menos de 2 segundos",
+        "Aluno não consegue editar a tela de outro grupo (teste de regras)",
+        "site/js/tela.js renderiza a mesma tela no celular e no telão"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F06",
+      "description": "Controle das fases e cronômetro.",
+      "steps": [
+        "O controle mostra a fase atual e botões para avançar, voltar e reiniciar a sala",
+        "O controle define um cronômetro em minutos; telão e celulares mostram a contagem regressiva sincronizada",
+        "Mudar a fase no controle muda a tela de todos os celulares sem recarregar"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F07",
+      "description": "Troca de sessão da rodada 1.",
+      "steps": [
+        "'Trocar sessão' muda o dono de cada tela para o próximo grupo numa única atualização",
+        "Cada celular mostra o aviso 'Sua sessão acabou. Você é um agente novo, sem memória.' e passa a editar a tela herdada",
+        "Com 1 grupo só, a troca não quebra (a tela continua com o mesmo grupo)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F08",
+      "description": "Revelação dos critérios e placar da rodada 1.",
+      "steps": [
+        "Na fase r1_avaliacao, o controle copia os critérios de segredo para config e os celulares passam a vê-los",
+        "Antes dessa fase, os critérios não chegam ao celular (verificar no teste que a leitura falha)",
+        "Cada grupo marca quais critérios a tela em mãos cumpre",
+        "O telão mostra a média de critérios cumpridos na R1"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F09",
+      "description": "Rodada 2 com os cartões de harness e troca condicionada ao progress.md.",
+      "steps": [
+        "Na fase r2, cada grupo recebe uma tela nova em branco e os três cartões (AGENTS.md, feature_list, progress.md)",
+        "Na r2_troca, o grupo só confirma a saída depois de preencher o progress.md; o controle mostra quantos grupos já preencheram e pode forçar",
+        "O grupo que herda a tela vê o progress.md do anterior em destaque",
+        "Na r2_declaracao, o grupo marca os critérios que considera prontos"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F10",
+      "description": "Rodada 3 de revisão e tela de resultado.",
+      "steps": [
+        "Na fase r3, cada tela da R2 vai para um grupo revisor diferente do autor e do dono atual quando houver 3 ou mais grupos",
+        "O revisor aprova ou reprova cada critério sem ver as marcações do autor antes de enviar",
+        "Na fase resultado, o telão mostra R1 vs R2 e, na R2, 'declarado pronto' vs 'aprovado pelo revisor', destacando a diferença como 'vitória falsa'"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F11",
+      "description": "Oficina 'Monte seu harness' e votação.",
+      "steps": [
+        "Na fase oficina, cada grupo escolhe um projeto da lista e preenche AGENTS.md (até 8 linhas), 3 funcionalidades com aceite e evidência, e o primeiro passo",
+        "Na fase votacao, cada aluno vota uma vez, não pode votar no próprio grupo e pode trocar o voto",
+        "O telão mostra os harnesses e a contagem de votos ao vivo",
+        "Na fase fim, o controle baixa o harness vencedor como .zip com AGENTS.md, feature_list.json e claude-progress.md"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F12",
+      "description": "Modo ensaio com alunos-bot.",
+      "steps": [
+        "O controle tem 'Adicionar 20 alunos falsos', que cria bots que entram na sala",
+        "Os bots adicionam e editam componentes aleatórios nas fases de edição e preenchem progress.md, avaliações, revisões e votos",
+        "Uma partida completa do lobby ao fim com 20 bots roda sem erro no console (teste e2e)"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F13",
+      "description": "Resiliência: reconexão e entrada atrasada.",
+      "steps": [
+        "Aluno que perde a conexão e volta continua no grupo e na fase atual",
+        "Aluno que entra durante a r2 cai num grupo existente e vê a tela que o grupo tem agora"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F14",
+      "description": "Modo offline do telão (plano B).",
+      "steps": [
+        "telao.html?offline=1 roda todas as fases numa tela só, sem Firebase, com estado local",
+        "O apresentador cria os grupos, monta as telas e marca critérios pela própria tela",
+        "O resultado R1 vs R2 e a vitória falsa aparecem como no modo online"
+      ],
+      "passes": false
+    },
+    {
+      "id": "F15",
+      "description": "Acabamento para celular e projetor.",
+      "steps": [
+        "Teste e2e com viewport de 360x740 sem rolagem horizontal em todas as fases do aluno",
+        "Teste e2e com viewport de 1920x1080 no telão em todas as fases",
+        "Lighthouse de acessibilidade do index.html com nota mínima 90"
+      ],
+      "passes": false
+    }
+  ]
+}
