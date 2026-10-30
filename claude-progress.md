@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 pronta e verificada (passes: true). Próximo passo: feature F02 (login do apresentador,
-criação de sala e regras do banco).
+F01 e F02 prontas e verificadas (passes: true). Próximo passo: feature F03 (entrada dos alunos
+e distribuição automática em grupos).
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,24 @@ criação de sala e regras do banco).
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F02
+- Feito: database.rules.json com as regras de verdade: admin = `admins/{email com "." → ","}`
+  (comparado em minúsculas); só admin lê/escreve `salas/**`; qualquer autenticado lê
+  `salas/{sala}/estado` e `config`; `segredo` e o resto ficam só do admin. site/js/controle.js +
+  controle.html: login e-mail/senha, "Sair", aviso quando o e-mail não está em admins, "Criar sala"
+  (4 letras sem I/O, confere se o código está livre) gravando estado {fase: lobby, timerFim: 0,
+  atualizadoEm}, config {tamanhoGrupo: 5, frase} e segredo/criterios (os 5 padrão). Mostra o
+  código, o link dos alunos e o link do telão. tests/emulador.js: helpers que carregam as regras do
+  arquivo no emulador, criam usuário no Auth e semeiam admin via REST (Bearer owner).
+- Como verifiquei: npm test 13/13 (7 novos em tests/f02-controle.spec.js: login, senha errada,
+  não-admin, criar sala, anônimo não escreve estado/segredo, anônimo não lê segredo, admin lê/escreve).
+- Problemas / decisões: o banco guarda chaves 1..5 como array com null no índice 0 (ex.:
+  segredo/criterios); quem ler precisa tratar os dois formatos. Leitura negada no SDK vem com
+  mensagem "Permission denied" sem `code`; o teste normaliza. Alunos ainda não conseguem escrever
+  em nada: as regras de alunos/grupos/telas/votos entram nas features F03, F05 etc.
+- Próximo passo: F03. Vai precisar de regras para `alunos/{uid}` (só o próprio) e de uma forma de
+  o aluno entrar num grupo (transação em `grupos`), que hoje é só do admin.
 
 ### 2026-10-30 · Feature F01 (verificação)
 - Feito: init.sh agora também espera a porta 9099 (Auth) antes do teste de fumaça; o Auth sobe

@@ -22,7 +22,7 @@
         "Teste de regras: usuário anônimo não consegue escrever em salas/{sala}/estado nem em segredo",
         "Teste de regras: usuário anônimo não consegue ler salas/{sala}/segredo"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F03",

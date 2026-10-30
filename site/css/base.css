@@ -37,3 +37,35 @@ body.telao main {
 }
 
 body.telao h1 { font-size: 3rem; }
+
+.formulario { display: flex; flex-direction: column; gap: 8px; }
+
+input, button { font: inherit; }
+
+input {
+  padding: 10px 12px;
+  border: 1px solid #b6bcc6;
+  border-radius: 8px;
+  width: 100%;
+}
+
+button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #1f6feb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.5; cursor: default; }
+
+button.secundario { background: #e1e4e8; color: #1b1e24; padding: 4px 10px; }
+
+.erro { color: #b00020; margin: 4px 0; }
+.erro:empty { display: none; }
+
+.codigo-sala { font-size: 2rem; letter-spacing: 0.15em; }
+
+#link-aluno { word-break: break-all; }

@@ -1,6 +1,24 @@
 {
   "rules": {
     ".read": false,
-    ".write": false
+    ".write": false,
+    "admins": {
+      "$email": {
+        ".read": "auth != null && auth.token.email != null && auth.token.email.toLowerCase().replace('.', ',') === $email",
+        ".write": false
+      }
+    },
+    "salas": {
+      ".read": "auth != null && auth.token.email != null && root.child('admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+      ".write": "auth != null && auth.token.email != null && root.child('admins').child(auth.token.email.toLowerCase().replace('.', ',')).val() === true",
+      "$sala": {
+        "estado": {
+          ".read": "auth != null"
+        },
+        "config": {
+          ".read": "auth != null"
+        }
+      }
+    }
   }
 }

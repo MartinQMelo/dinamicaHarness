@@ -10,11 +10,37 @@
 <body>
   <main>
     <h1>Controle da dinâmica</h1>
-    <p>Área do apresentador.</p>
+
+    <section id="tela-login" hidden>
+      <p>Área do apresentador. Entre com seu e-mail e senha.</p>
+      <form id="form-login" class="formulario">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" autocomplete="current-password" required>
+        <button type="submit">Entrar</button>
+        <p id="erro-login" class="erro" role="alert"></p>
+      </form>
+    </section>
+
+    <section id="tela-painel" hidden>
+      <p>Conectado como <strong id="usuario-email"></strong>.
+        <button id="botao-sair" type="button" class="secundario">Sair</button></p>
+      <p id="aviso-nao-admin" class="erro" hidden>Seu e-mail não está cadastrado como apresentador (admins).</p>
+      <button id="botao-criar-sala" type="button" disabled>Criar sala</button>
+      <p id="erro-painel" class="erro" role="alert"></p>
+      <div id="sala-criada" hidden>
+        <p>Sala criada: <strong id="sala-codigo" class="codigo-sala"></strong></p>
+        <p>Link dos alunos: <span id="link-aluno"></span></p>
+        <p><a id="link-telao" target="_blank" rel="noopener">Abrir o telão</a></p>
+      </div>
+    </section>
   </main>
   <script type="module">
     import { acompanharConexao } from './js/conexao.js';
+    import { iniciarControle } from './js/controle.js';
     acompanharConexao();
+    iniciarControle();
   </script>
 </body>
 </html>
