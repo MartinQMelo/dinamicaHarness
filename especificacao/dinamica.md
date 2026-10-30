@@ -57,19 +57,22 @@ Os critérios ficam em `salas/{sala}/config/criterios` e só são enviados aos a
 
 ## Modelo de dados (Realtime Database)
 ```
+admins/{emailCodificado}: true              # e-mail com "." trocado por "," (ex.: fulano@gmail,com)
 salas/{sala}/
-  estado: { fase, timerFim, atualizadoEm }
-  config: { tamanhoGrupo, frase, criterios? }
-  segredo: { criterios }                     # leitura só do apresentador
+  estado: { fase, timerFim, atualizadoEm, vencedor? }   # vencedor: gid escolhido pelo controle no fim
+  config: { tamanhoGrupo, frase, criterios? } # criterios só existe da r1_avaliacao em diante
+  segredo: { criterios }                     # leitura e escrita só do apresentador
   alunos/{uid}: { nome, grupo, entrouEm }
   grupos/{gid}: { cor, nome, ordem, membros: {uid: true} }
   telas/{tid}: { rodada, autor: gid, dono: gid, componentes: [ {tipo, texto, editandoPor?} ],
-                 progresso, declarados: {1..5: bool}, avaliacaoR1: {1..5: bool},
+                 progresso, saiu?: { por: uid, em: timestamp },
+                 declarados: {1..5: bool}, avaliacaoR1: {1..5: bool},
                  revisao: { revisor: gid, aprovados: {1..5: bool}, enviadoEm } }
+  trocas/{fase}: { tid: donoAntes }          # gravado a cada troca, para "voltar fase" desfazer
   oficina/{gid}: { projeto, agents, features: [ {nome, aceite, evidencia} ], progresso }
   votos/{uid}: gid
 ```
-A troca de sessão é uma única atualização multi-caminho feita pelo controle, mudando `dono` de todas as telas e a `fase` juntos.
+A troca de sessão é uma única atualização multi-caminho feita pelo controle, mudando `dono` de todas as telas e a `fase` juntos (e gravando `trocas/{fase}`).
 
 ## Segurança (regras em `database.rules.json`)
 - Alunos usam Auth anônimo. Cada aluno só escreve o próprio `alunos/{uid}` e o próprio voto.
@@ -87,3 +90,17 @@ A troca de sessão é uma única atualização multi-caminho feita pelo controle
 - Fundo escuro no telão, letras grandes legíveis do fundo do auditório (mínimo 32 px nos números do placar).
 - Cada grupo identificado por cor em todas as telas.
 - O telão mostra o QR code (gerado no navegador) e o link curto durante o `lobby`.
+
+## Decisões (2026-10-30)
+Respostas do apresentador às ambiguidades levantadas antes da F01. Elas prevalecem sobre o texto acima quando houver conflito.
+
+1. **Critérios.** O controle edita os critérios só em `segredo/criterios`. Ao entrar em `r1_avaliacao`, copia para `config/criterios`. Regra: `config/criterios` existe se e somente se a fase for `r1_avaliacao` ou posterior. Voltar para antes disso apaga `config/criterios`.
+2. **Voltar fase desfaz a troca.** Cada troca grava `salas/{sala}/trocas/{fase}: {tid: donoAntes}`. Voltar a fase restaura os donos numa única atualização multi-caminho. "Voltar" existe para corrigir erro do apresentador.
+3. **Saída na `r2_troca`.** O grupo sai gravando `telas/{tid}/saiu: {por: uid, em: timestamp}`. A troca só acontece quando o controle aperta o botão; nunca é automática. O controle e o telão mostram "X de N grupos prontos". Forçar a troca ignora quem não saiu.
+4. **Declaração na `r2_declaracao`.** Quem declara é o grupo que tem a tela agora (o herdeiro), não o autor.
+5. **Revisão na `r3`.** O `dono` NÃO muda; o revisor fica em `revisao.revisor`. Só o grupo revisor escreve em `telas/{tid}/revisao/aprovados`, e só durante a `r3`.
+6. **Grupos.** "Aberto" = não cheio; não existe estado de grupo fechado. No `lobby`, se todos estiverem cheios, cria-se um grupo novo. A partir da `r1` nunca se criam grupos: quem entra atrasado vai para o grupo com menos membros, mesmo passando do limite.
+7. **Rebalancear.** Deixa os grupos com tamanhos quase iguais (diferença máxima de 1), movendo o menor número possível de alunos. O botão só fica disponível no `lobby`.
+8. **Admins e telão.** Apresentadores ficam em `admins/{emailCodificado}: true`, com "." trocado por "," (ex.: `admins/fulano@gmail,com`). O cadastro é feito à mão no console do Firebase. O telão faz login anônimo e só lê. Nos testes, o emulador semeia o admin.
+9. **Empate na votação.** O telão mostra todos os empatados e o controle escolhe o vencedor com um botão (grava `estado/vencedor`); o `.zip` baixa o escolhido. Só aluno com grupo vota.
+10. **Config do Firebase.** `site/js/firebase-config.js` é um modelo com placeholders. Em localhost ele usa os emuladores e não precisa da config real. Fora de localhost, se os placeholders não tiverem sido trocados, a página mostra um aviso claro.

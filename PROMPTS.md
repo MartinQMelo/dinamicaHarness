@@ -3,10 +3,11 @@
 Use os três prompts abaixo em sessões separadas. Cada sessão começa do zero e se orienta só pelos arquivos do repositório. É o mesmo princípio que vocês vão ensinar na aula.
 
 ## Antes de começar (feito por vocês, uma vez)
-1. Crie um repositório no GitHub (ex.: `dinamica-harness`) e coloque nele todos os arquivos deste pacote.
+1. O repositório no github aidnae stá vazio e acabou de ser criado
 2. Em https://console.firebase.google.com crie um projeto. Ative o **Realtime Database** e, em Authentication, os métodos **Anônimo** e **E-mail/senha**. Crie um usuário de e-mail e senha para o apresentador.
 3. Em Configurações do projeto → Seus apps → Web, registre um app e copie o objeto `firebaseConfig`. Ele vai para `site/js/firebase-config.js` (não é segredo).
 4. No GitHub, em Settings → Pages, escolha "GitHub Actions" como origem.
+5. Cadastre o e-mail do apresentador como admin: no console do Firebase, em Realtime Database → Dados, crie o nó `admins` e, dentro dele, a chave com o e-mail trocando todo "." por "," e o valor `true`. Exemplo: `admins/fulano@gmail,com: true`. Sem isso, o login funciona mas as regras do banco recusam as ações do controle.
 
 ---
 
