@@ -79,7 +79,7 @@ A troca de sessão é uma única atualização multi-caminho feita pelo controle
 ## Segurança (regras em `database.rules.json`)
 - Alunos usam Auth anônimo. Cada aluno só escreve o próprio `alunos/{uid}` e o próprio voto.
 - Um aluno só edita telas cujo `dono` é o seu grupo, e só na fase que permite edição.
-- Só o apresentador (e-mail listado em `admins/{emailCodificado}`) escreve `estado`, `config`, `segredo`, `grupos` e `dono`.
+- Só o apresentador (e-mail listado em `admins/{emailCodificado}`) escreve `estado`, `config`, `segredo` e `dono`. Em `grupos`, o aluno só pode se adicionar a um grupo (ver Decisão 11); todo o resto de `grupos` é do apresentador.
 - Testar as regras com o emulador: um aluno tentando mudar `estado` ou editar tela de outro grupo deve falhar.
 
 ## Resiliência
@@ -106,3 +106,4 @@ Respostas do apresentador às ambiguidades levantadas antes da F01. Elas prevale
 8. **Admins e telão.** Apresentadores ficam em `admins/{emailCodificado}: true`, com "." trocado por "," (ex.: `admins/fulano@gmail,com`). O cadastro é feito à mão no console do Firebase. O telão faz login anônimo e só lê. Nos testes, o emulador semeia o admin.
 9. **Empate na votação.** O telão mostra todos os empatados e o controle escolhe o vencedor com um botão (grava `estado/vencedor`); o `.zip` baixa o escolhido. Só aluno com grupo vota.
 10. **Config do Firebase.** `site/js/firebase-config.js` é um modelo com placeholders. Em localhost ele usa os emuladores e não precisa da config real. Fora de localhost, se os placeholders não tiverem sido trocados, a página mostra um aviso claro.
+11. **Aluno entra no grupo sozinho (2026-10-30).** A distribuição automática exige que o aluno se coloque no grupo, sem Cloud Functions. As regras permitem que o aluno adicione só a si mesmo em `grupos/{gid}/membros` (sem mudar `cor`, `nome` e `ordem`) e que crie um grupo novo só no `lobby`. O limite de tamanho do grupo é garantido pela transação na página, não pelas regras, que não sabem contar filhos. Risco aceito para uso em sala: um aluno mal-intencionado poderia, na mesma escrita em que se adiciona, passar do limite ou tirar outro membro do grupo. O controle mostra o tamanho de cada grupo e permite remover um aluno de um grupo, para o apresentador corrigir.

@@ -13,6 +13,17 @@ lobby: QR code, link, contagem ao vivo).
 - Próximo passo:
 -->
 
+### 2026-10-30 · Decisão 11 (grupos) registrada na especificação
+- Feito: o apresentador aceitou a regra de grupos e o risco (sem Cloud Functions). A Decisão 11 foi
+  registrada em especificacao/dinamica.md e a frase da seção Segurança, corrigida.
+- Pendência da F06 (pedido do apresentador; não cabe na F04, que é só o telão): no controle, mostrar
+  o tamanho de cada grupo e um botão para remover um aluno do grupo. Remover = apagar, numa única
+  atualização multi-caminho, `grupos/{gid}/membros/{uid}` e `alunos/{uid}`. Assim o aluno volta à
+  tela de nome e entra de novo pela distribuição (as regras de alunos/{uid} exigem ser membro do
+  grupo, então não dá para só tirar do grupo e manter o registro). O admin já tem escrita em salas/**.
+  Fazer junto da F06 e cobrir com teste e2e.
+- Próximo passo: F04.
+
 ### 2026-10-30 · Feature F03
 - Feito: site/js/grupos.js (paleta Azul…Vermelho, depois "Azul 2"; gid = g1, g2…;
   escolherGrupo: no lobby, o grupo não cheio com menos membros, ou um novo se todos cheios; fora
