@@ -234,14 +234,14 @@ test.describe('F06 · controle das fases e cronômetro', () => {
         await expect(p.locator('#tela-editor')).toBeVisible();
       }
 
-      // r1_troca → r1_avaliacao: sai do editor.
+      // r1_troca → r1_avaliacao: sai do editor e vai para a avaliação (F08).
       await avancar.click();
       for (const { page: p } of celulares) {
         await expect(p.locator('#fase-aluno')).toHaveText('Rodada 1 · avaliação');
         await expect(p.locator('#tela-editor')).toBeHidden();
-        await expect(p.locator('#tela-grupo')).toBeVisible();
+        await expect(p.locator('#tela-avaliacao')).toBeVisible();
       }
-      await expect(telao.locator('#telao-fase')).toHaveText('Rodada 1 · avaliação');
+      await expect(telao.locator('#telao-avaliacao')).toBeVisible();
 
       // Voltar duas vezes leva de volta ao editor e depois ao lobby.
       await voltar.click();

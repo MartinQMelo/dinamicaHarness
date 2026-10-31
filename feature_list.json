@@ -86,7 +86,7 @@
         "Cada grupo marca quais critérios a tela em mãos cumpre",
         "O telão mostra a média de critérios cumpridos na R1"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F09",

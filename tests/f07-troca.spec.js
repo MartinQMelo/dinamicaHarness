@@ -247,7 +247,7 @@ test.describe('F07 · troca de sessão da rodada 1', () => {
 
       // Sair da fase de troca esconde o aviso.
       await page.getByRole('button', { name: 'Avançar fase →' }).click();
-      await expect(beto.page.locator('#tela-grupo')).toBeVisible();
+      await expect(beto.page.locator('#tela-avaliacao')).toBeVisible();
       await expect(beto.page.locator('#aviso-sessao')).toBeHidden();
 
       for (const p of [ana.page, beto.page]) expect(await p.evaluate(() => window.semRecarregar)).toBe(true);

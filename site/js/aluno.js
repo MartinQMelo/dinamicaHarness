@@ -6,6 +6,7 @@ import {
 import { auth, db } from './firebase-config.js';
 import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
 import { criarEditor } from './editor.js';
+import { criarAvaliacao } from './avaliacao.js';
 import { nomeDaFase, RODADA_DA_TROCA } from './fases.js';
 import { acompanharCronometro } from './cronometro.js';
 
@@ -15,7 +16,9 @@ const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor']) $(id).hidden = id !== secao;
+  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao']) {
+    $(id).hidden = id !== secao;
+  }
 }
 
 function esperarUsuario() {
@@ -28,13 +31,13 @@ function esperarUsuario() {
 async function entrarEmGrupo(sala, uid) {
   const raiz = `salas/${sala}`;
   for (let tentativa = 0; tentativa < 30; tentativa++) {
-    const [grupos, config, estado] = (await Promise.all([
-      get(ref(db, `${raiz}/grupos`)), get(ref(db, `${raiz}/config`)), get(ref(db, `${raiz}/estado`)),
+    const [grupos, tamanhoGrupo, estado] = (await Promise.all([
+      get(ref(db, `${raiz}/grupos`)), get(ref(db, `${raiz}/config/tamanhoGrupo`)), get(ref(db, `${raiz}/estado`)),
     ])).map((s) => s.val());
     const jaMembro = Object.entries(grupos || {}).find(([, g]) => g.membros?.[uid]);
     if (jaMembro) return jaMembro[0];
 
-    const tamanho = config?.tamanhoGrupo || 5;
+    const tamanho = tamanhoGrupo || 5;
     const escolha = escolherGrupo(grupos, tamanho, estado?.fase);
     if (!escolha) throw new Error('sem-grupo');
 
@@ -62,6 +65,7 @@ function acompanharGrupo(sala, uid, gid) {
     if (!grupo) return;
     $('grupo-nome').textContent = grupo.nome;
     $('editor-grupo').textContent = grupo.nome;
+    $('avaliacao-grupo').textContent = grupo.nome;
     $('cartao-grupo').style.background = grupo.cor;
     document.documentElement.style.setProperty('--cor-grupo', grupo.cor);
     const colegas = Object.keys(grupo.membros || {}).filter((m) => m !== uid);
@@ -77,9 +81,10 @@ function acompanharGrupo(sala, uid, gid) {
   onValue(ref(db, `salas/${sala}/alunos`), (s) => { alunos = s.val() || {}; desenhar(); });
 }
 
-// A fase decide o que o celular mostra: espera no grupo ou o editor da tela.
+// A fase decide o que o celular mostra: espera no grupo, o editor da tela ou a avaliação.
 function acompanharFase(sala, uid, gid) {
   let editor = null;
+  const avaliacao = criarAvaliacao(sala, gid);
   let faseAnterior;
   $('fechar-aviso-sessao').addEventListener('click', () => { $('aviso-sessao').hidden = true; });
   onValue(ref(db, `salas/${sala}/config/frase`), (s) => { $('frase-tarefa').textContent = s.val() || ''; });
@@ -91,6 +96,8 @@ function acompanharFase(sala, uid, gid) {
     // Ao chegar numa fase de troca (ou abrir a página nela), o aviso de sessão nova aparece.
     if (s.val() !== faseAnterior) $('aviso-sessao').hidden = !RODADA_DA_TROCA[s.val()];
     faseAnterior = s.val();
+    if (s.val() === 'r1_avaliacao') { avaliacao.mostrar(); mostrar('tela-avaliacao'); return; }
+    avaliacao.esconder();
     const rodada = RODADA_DE_EDICAO[s.val()];
     if (!rodada) { mostrar('tela-grupo'); return; }
     editor ||= criarEditor(sala, uid);

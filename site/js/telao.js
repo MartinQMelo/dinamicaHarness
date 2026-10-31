@@ -6,6 +6,9 @@ import { auth, db } from './firebase-config.js';
 import { contarMembros } from './grupos.js';
 import { desenharTela } from './tela.js';
 import { nomeDaFase } from './fases.js';
+import {
+  listaDeCriterios, contarMarcados, mediaDeCriterios, formatarMedia,
+} from './criterios.js';
 import { acompanharCronometro } from './cronometro.js';
 
 const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
@@ -13,7 +16,9 @@ const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['telao-sem-sala', 'telao-lobby', 'telao-rodada', 'telao-outra-fase']) $(id).hidden = id !== secao;
+  for (const id of ['telao-sem-sala', 'telao-lobby', 'telao-rodada', 'telao-avaliacao', 'telao-outra-fase']) {
+    $(id).hidden = id !== secao;
+  }
 }
 
 function esperarUsuario() {
@@ -85,6 +90,35 @@ function desenharTelas(telas, grupos, alunos, rodada) {
   }));
 }
 
+// Placar da R1: a média de critérios cumpridos, os critérios revelados e quanto cada tela cumpriu.
+function desenharPlacarR1(telas, grupos, criterios) {
+  const total = listaDeCriterios(criterios).length || 5;
+  $('placar-r1-media').textContent = formatarMedia(mediaDeCriterios(telas, grupos, 1, 'avaliacaoR1'));
+  $('placar-r1-total').textContent = total;
+  $('telao-criterios').replaceChildren(...listaDeCriterios(criterios).map(({ chave, texto }) => {
+    const li = document.createElement('li');
+    li.dataset.criterio = chave;
+    li.textContent = texto;
+    return li;
+  }));
+  const lista = Object.entries(telas || {})
+    .filter(([, t]) => t.rodada === 1 && grupos?.[t.dono])
+    .sort(([, a], [, b]) => grupos[a.autor]?.ordem - grupos[b.autor]?.ordem);
+  $('placar-r1-telas').replaceChildren(...lista.map(([tid, t]) => {
+    const li = document.createElement('li');
+    li.dataset.tid = tid;
+    li.style.setProperty('--cor-grupo', grupos[t.dono].cor);
+    const nome = document.createElement('span');
+    nome.className = 'telao-grupo-nome';
+    nome.textContent = `Tela de ${grupos[t.autor]?.nome || t.autor}`;
+    const n = document.createElement('strong');
+    n.className = 'telao-numero';
+    n.textContent = `${contarMarcados(t.avaliacaoR1)}/${total}`;
+    li.append(nome, n);
+    return li;
+  }));
+}
+
 export async function iniciarTelao() {
   if (!auth) return;
   const sala = (new URLSearchParams(location.search).get('sala') || '').trim().toUpperCase();
@@ -102,11 +136,30 @@ export async function iniciarTelao() {
   let telas = {};
   let grupos = {};
   let alunos = {};
-  const redesenhar = () => { if (rodada) desenharTelas(telas, grupos, alunos, rodada); };
+  let criterios = null;
+  let pararCriterios = null;
+  let placar = false;
+  const redesenhar = () => {
+    if (rodada) desenharTelas(telas, grupos, alunos, rodada);
+    if (placar) desenharPlacarR1(telas, grupos, criterios);
+  };
+  // config/criterios só pode ser lido da r1_avaliacao em diante: escuta só enquanto mostra o placar.
+  const escutarCriterios = (ligar) => {
+    if (ligar && !pararCriterios) {
+      pararCriterios = onValue(ref(db, `${raiz}/config/criterios`), (s) => { criterios = s.val(); redesenhar(); },
+        () => { criterios = null; redesenhar(); });
+    } else if (!ligar && pararCriterios) {
+      pararCriterios();
+      pararCriterios = null;
+      criterios = null;
+    }
+  };
 
   onValue(ref(db, `${raiz}/estado`), (s) => {
     const estado = s.val();
     document.body.dataset.fase = estado?.fase || '';
+    placar = estado?.fase === 'r1_avaliacao';
+    escutarCriterios(placar);
     if (!estado) {
       $('mensagem-telao-sem-sala').textContent = `A sala ${sala} não existe.`;
       mostrar('telao-sem-sala');
@@ -118,6 +171,10 @@ export async function iniciarTelao() {
       $('telao-rodada-titulo').textContent = `Rodada ${rodada}`;
       redesenhar();
       mostrar('telao-rodada');
+    } else if (placar) {
+      rodada = null;
+      redesenhar();
+      mostrar('telao-avaliacao');
     } else {
       rodada = null;
       $('telao-fase').textContent = nomeDaFase(estado.fase);

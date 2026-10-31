@@ -35,6 +35,11 @@ export function faseAnterior(fase) {
   return i > 0 ? FASES[i - 1] : null;
 }
 
+// config/criterios existe da r1_avaliacao em diante (Decisão 1). As regras do banco usam a mesma lista.
+export function criteriosRevelados(fase) {
+  return FASES.indexOf(fase) >= FASES.indexOf('r1_avaliacao');
+}
+
 // Fases em que acontece a troca de sessão, e de qual rodada são as telas trocadas.
 export const RODADA_DA_TROCA = { r1_troca: 1 };
 
@@ -76,9 +81,14 @@ export function atualizacaoDeDesfazerTroca(fase, { telas, trocas } = {}) {
 // cronômetro. Ao entrar na r1, cria a tela em branco dos grupos que ainda não têm a sua (voltar e
 // avançar de novo não apaga o que já foi feito). Entrar numa fase de troca troca as sessões, se a
 // troca ainda não foi feita (voltar da fase seguinte não troca de novo); voltar para a fase de antes
-// da troca a desfaz.
-export function atualizacaoDeFase(para, { grupos, telas, trocas } = {}, agora = Date.now()) {
+// da troca a desfaz. Da r1_avaliacao em diante, config/criterios é a cópia de segredo/criterios; antes
+// dela, é apagado se existir (os alunos não podem ler os critérios antes da hora).
+export function atualizacaoDeFase(para, {
+  grupos, telas, trocas, segredo, config,
+} = {}, agora = Date.now()) {
   const updates = { 'estado/fase': para, 'estado/timerFim': 0, 'estado/atualizadoEm': agora };
+  if (criteriosRevelados(para)) updates['config/criterios'] = segredo?.criterios || null;
+  else if (config?.criterios) updates['config/criterios'] = null;
   if (para === 'r1') {
     for (const [caminho, tela] of Object.entries(telasIniciais(grupos, 1))) {
       if (!telas?.[caminho.slice('telas/'.length)]) updates[caminho] = tela;

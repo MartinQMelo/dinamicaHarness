@@ -74,6 +74,20 @@
         <p id="erro-editor" class="erro" role="alert"></p>
       </div>
     </section>
+
+    <section id="tela-avaliacao" class="avaliacao" hidden>
+      <p class="faixa-grupo">Grupo <strong id="avaliacao-grupo"></strong></p>
+      <h2>Os critérios eram estes</h2>
+      <p>Marque os critérios que a tela que vocês têm em mãos cumpre.</p>
+      <p id="avaliacao-aguardando">Aguardando o apresentador revelar os critérios…</p>
+      <div id="avaliacao-area" hidden>
+        <ul id="avaliacao-criterios" class="lista-criterios"></ul>
+        <p id="avaliacao-total" class="avaliacao-total"></p>
+        <p id="erro-avaliacao" class="erro" role="alert"></p>
+        <h3>A tela em mãos</h3>
+        <div id="avaliacao-moldura"></div>
+      </div>
+    </section>
   </main>
   <script type="module">
     import { acompanharConexao } from './js/conexao.js';

@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F07 prontas e verificadas (passes: true). Próximo passo: feature F08 (revelação dos
-critérios e placar da R1). Ponto de extensão: atualizacaoDeFase em site/js/fases.js.
+F01 a F08 prontas e verificadas (passes: true). Próximo passo: feature F09 (rodada 2 com os
+cartões de harness). Pontos de extensão: atualizacaoDeFase (site/js/fases.js) e site/js/criterios.js.
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,38 @@ critérios e placar da R1). Ponto de extensão: atualizacaoDeFase em site/js/fas
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-31 · Feature F08
+- Feito: fases.js › criteriosRevelados(fase) (r1_avaliacao em diante) e atualizacaoDeFase recebe
+  segredo e config: da r1_avaliacao em diante grava config/criterios = segredo/criterios; antes dela,
+  apaga config/criterios só se existir (as atualizações das outras fases ficam iguais). O controle lê
+  segredo e config ao mudar de fase. Regras: config deixou de ser legível inteiro; tamanhoGrupo e
+  frase continuam legíveis para qualquer autenticado; config/criterios só da r1_avaliacao em diante
+  (lista de fases na regra). telas/{tid}/avaliacaoR1/{c1..c5}: booleano, escrito só pelo grupo dono
+  da tela, rodada 1, só na r1_avaliacao. aluno.js lê config/tamanhoGrupo em vez de config.
+  site/js/criterios.js (sem Firebase): listaDeCriterios, contarMarcados, mediaDeCriterios(telas,
+  grupos, rodada, campo), formatarMedia ("2,5"); serve para a F10. Celular: site/js/avaliacao.js e a
+  seção tela-avaliacao (critérios com caixas, "N de 5 critérios cumpridos", desenho da tela em mãos).
+  Telão: seção telao-avaliacao com a média grande, "de 5", cada tela (pelo autor, na cor do dono)
+  com N/5 e os critérios revelados. Celular e telão só escutam config/criterios enquanto estão na
+  r1_avaliacao (uma escuta negada pelas regras é cancelada e não volta).
+  Correção de bug da F04: `.telao-lobby { display: flex }` anulava o atributo hidden e o lobby (QR e
+  grupos) continuava aparecendo nas outras fases. Regra global `[hidden] { display: none !important }`.
+- Como verifiquei: npm test 39/39 (3 novos em tests/f08-avaliacao.spec.js): critério editado em
+  segredo antes de revelar aparece copiado em config e nos 2 celulares sem recarregar; voltar apaga e
+  avançar revela de novo; na r2 continua. Leitura negada pelo SDK de config/criterios, config e
+  segredo no celular e no telão em lobby, r1 e r1_troca (mesmo com config/criterios gravado à força),
+  liberada na r1_avaliacao, negada de novo ao voltar. 4 alunos em 2 grupos marcam a tela em mãos, o
+  colega vê as marcas, o banco grava, a média do telão vai 0 → 1,5 → 2,5 → 2 ao vivo, números do
+  placar ≥ 32 px, regras (tela do outro, c9, não booleano, fora da fase → negado). Conferi que os
+  testes falham com a regra de critérios aberta, sem a cópia em atualizacaoDeFase e sem a correção
+  do [hidden]. Repeti o arquivo da F08 2 vezes sem falha; conferi por screenshot (360 px e 1920).
+  Ajustei os testes da F06 e F07 que esperavam a tela do grupo/"Fase: X" na r1_avaliacao.
+- Problemas / decisões: o placar conta toda tela da R1 cujo dono é um grupo existente; tela sem
+  marcação conta como 0. O telão mostra cada tela pelo nome do grupo autor ("Tela de Azul"), na cor
+  de quem a avaliou. Os critérios no celular aparecem só na r1_avaliacao (a F09 usa na feature_list).
+- Próximo passo: F09. config/criterios já está disponível da r2 em diante para os cartões; a
+  r2_troca provavelmente precisa entrar em RODADA_DA_TROCA (ver a nota da F07).
 
 ### 2026-10-30 · Feature F07
 - Feito: a troca é a passagem r1 → r1_troca, numa única atualização multi-caminho (como no modelo

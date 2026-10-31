@@ -16,7 +16,15 @@
           ".read": "auth != null"
         },
         "config": {
-          ".read": "auth != null"
+          "tamanhoGrupo": {
+            ".read": "auth != null"
+          },
+          "frase": {
+            ".read": "auth != null"
+          },
+          "criterios": {
+            ".read": "auth != null && root.child('salas').child($sala).child('estado/fase').val().matches(/^(r1_avaliacao|r2|r2_troca|r2_declaracao|r3|resultado|oficina|votacao|fim)$/)"
+          }
         },
         "alunos": {
           ".read": "auth != null",
@@ -58,6 +66,12 @@
                 "$outro": {
                   ".validate": false
                 }
+              }
+            },
+            "avaliacaoR1": {
+              "$c": {
+                ".write": "auth != null && data.parent().parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().parent().child('dono').val() && data.parent().parent().child('rodada').val() === 1 && root.child('salas').child($sala).child('estado/fase').val() === 'r1_avaliacao'",
+                ".validate": "$c.matches(/^c[1-5]$/) && newData.isBoolean()"
               }
             }
           }

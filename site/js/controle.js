@@ -114,9 +114,11 @@ async function removerAluno(gid, uid, nome) {
 
 async function irParaFase(para) {
   if (!para) return;
-  const [grupos, telas, trocas] = (await Promise.all(['grupos', 'telas', 'trocas']
+  const [grupos, telas, trocas, segredo, config] = (await Promise.all(['grupos', 'telas', 'trocas', 'segredo', 'config']
     .map((filho) => get(ref(db, `salas/${sala}/${filho}`))))).map((s) => s.val());
-  await update(ref(db, `salas/${sala}`), atualizacaoDeFase(para, { grupos, telas, trocas }, serverTimestamp()));
+  await update(ref(db, `salas/${sala}`), atualizacaoDeFase(para, {
+    grupos, telas, trocas, segredo, config,
+  }, serverTimestamp()));
 }
 
 async function executar(acao) {

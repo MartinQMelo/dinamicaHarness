@@ -2,6 +2,9 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+/* Classes com display (flex, grid) não podem anular o atributo hidden. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -323,3 +326,26 @@ body.telao main { position: relative; }
 .controle-grupo-nome { margin: 0 0 4px; font-weight: 700; }
 .controle-grupos ul { margin: 0; padding-left: 16px; }
 .controle-grupos ul li { padding: 2px 0; }
+
+/* Avaliação da R1: critérios no celular e placar no telão */
+.lista-criterios { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 8px; }
+.lista-criterios label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 2px solid #d0d7de;
+}
+.lista-criterios input { width: 24px; height: 24px; flex: none; margin: 0; }
+.lista-criterios label:has(input:checked) { border-color: var(--cor-grupo, #1f6feb); }
+.avaliacao-total { font-weight: 700; }
+.telao-avaliacao { font-size: 1.75rem; }
+.telao-avaliacao-colunas { display: flex; gap: 64px; flex-wrap: wrap; }
+.telao-placar-r1 { flex: 1; min-width: 400px; }
+.telao-revelados { flex: 1.4; min-width: 400px; }
+.telao-media { margin: 0; }
+.telao-numero-grande { font-size: 9rem; font-weight: 800; line-height: 1; }
+.telao-media-de { font-size: 2rem; }
+.telao-criterios { font-size: 1.75rem; margin: 0; padding-left: 1.5em; display: grid; gap: 16px; }
