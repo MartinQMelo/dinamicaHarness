@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F05 prontas e verificadas (passes: true). Próximo passo: feature F06 (controle das fases e
-cronômetro). Atenção: ao entrar na r1, o controle precisa criar as telas com telasIniciais (ver F05).
+F01 a F06 prontas e verificadas (passes: true). Próximo passo: feature F07 (troca de sessão da
+rodada 1). Ponto de extensão: atualizacaoDeFase em site/js/fases.js.
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,34 @@ cronômetro). Atenção: ao entrar na r1, o controle precisa criar as telas com 
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F06
+- Feito: site/js/fases.js (sem Firebase): FASES na ordem da especificação, NOMES_DAS_FASES em
+  português, proximaFase/faseAnterior, atualizacaoDeFase(para, {grupos, telas}) → multi-caminho
+  com fase, timerFim 0 e atualizadoEm; ao ir para r1 cria só as telas que faltam (voltar e avançar
+  não apaga trabalho); atualizacaoDeReinicio (lobby; apaga alunos, grupos, telas, trocas, oficina,
+  votos e config/criterios; mantém frase, tamanhoGrupo e segredo). site/js/cronometro.js:
+  timerFim no relógio do servidor (Date.now + .info/serverTimeOffset), mostra "⏱ m:ss" ou
+  "⏱ Tempo esgotado", some com timerFim 0. Controle: fase atual, "← Voltar fase", "Avançar fase →",
+  "Próxima: …", cronômetro (minutos, Iniciar, Parar), grupos com tamanho e membros por ordem de
+  chegada e botão "Remover" (pendência da Decisão 11: apaga membros/{uid} e alunos/{uid} numa
+  atualização), "Reiniciar sala" com confirm. A sala aberta vai para ?sala= na URL e recarregar o
+  controle a reabre. Celular: barra com o nome da fase e o cronômetro; se alunos/{uid} some
+  (removido ou sala reiniciada), recarrega e volta à tela de nome. Telão: cronômetro no canto e
+  o nome da fase em português.
+- Como verifiquei: npm test 33/33 (5 novos em tests/f06-fases.spec.js): avançar pelas 12 fases até
+  o fim, voltar, recarregar o controle, reiniciar (banco limpo, celular volta ao nome e entra de
+  novo); cronômetro de 2 min igual (±1 s) no controle, telão e dois celulares, um deles com o
+  relógio 3 min adiantado (Date trocado por addInitScript); tempo esgotado; parar e mudar de fase
+  zeram; lobby → r1 → r1_troca → r1_avaliacao → voltar em dois celulares e no telão sem recarregar;
+  voltar/avançar mantém os componentes da r1; remover aluno. Conferi que o teste do cronômetro
+  falha se a correção do offset for desligada. Repeti o arquivo da F06 2 vezes sem falha.
+- Problemas / decisões: mudar de fase zera o cronômetro (cada fase tem o seu). O controle não
+  tem ainda os efeitos das fases seguintes (troca de donos, cópia dos critérios, telas da r2):
+  cada feature acrescenta o seu em atualizacaoDeFase. Avançar até r1_troca hoje só muda a fase;
+  "Trocar sessão" é da F07. O botão "Rebalancear grupos" da especificação não está em nenhuma
+  feature e não foi feito (ver Ideias).
+- Próximo passo: F07. Lembrar da Decisão 2: a troca grava trocas/{fase} e voltar a fase restaura.
 
 ### 2026-10-30 · Feature F05
 - Feito: site/js/tela.js (sem Firebase, importável pelos testes): CATALOGO dos 10 tipos com texto
@@ -151,3 +179,4 @@ cronômetro). Atenção: ao entrar na r1, o controle precisa criar as telas com 
 - Próximo passo: rodar ./init.sh e npm test; se passar, marcar F01 true e commitar o package-lock.
 
 ## Ideias (fora do escopo, não implementar)
+- "Rebalancear grupos" no lobby (está na especificação e na Decisão 7, mas em nenhuma feature).

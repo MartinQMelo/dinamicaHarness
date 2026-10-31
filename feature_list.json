@@ -65,7 +65,7 @@
         "O controle define um cronômetro em minutos; telão e celulares mostram a contagem regressiva sincronizada",
         "Mudar a fase no controle muda a tela de todos os celulares sem recarregar"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F07",

@@ -5,6 +5,8 @@ import qrcode from 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm';
 import { auth, db } from './firebase-config.js';
 import { contarMembros } from './grupos.js';
 import { desenharTela } from './tela.js';
+import { nomeDaFase } from './fases.js';
+import { acompanharCronometro } from './cronometro.js';
 
 const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
 
@@ -104,6 +106,7 @@ export async function iniciarTelao() {
 
   onValue(ref(db, `${raiz}/estado`), (s) => {
     const estado = s.val();
+    document.body.dataset.fase = estado?.fase || '';
     if (!estado) {
       $('mensagem-telao-sem-sala').textContent = `A sala ${sala} não existe.`;
       mostrar('telao-sem-sala');
@@ -117,10 +120,11 @@ export async function iniciarTelao() {
       mostrar('telao-rodada');
     } else {
       rodada = null;
-      $('telao-fase').textContent = estado.fase;
+      $('telao-fase').textContent = nomeDaFase(estado.fase);
       mostrar('telao-outra-fase');
     }
   });
+  acompanharCronometro(sala, $('cronometro'));
   onValue(ref(db, `${raiz}/config/frase`), (s) => { $('telao-frase').textContent = s.val() || ''; });
   onValue(ref(db, `${raiz}/telas`), (s) => { telas = s.val() || {}; redesenhar(); });
   onValue(ref(db, `${raiz}/alunos`), (s) => {

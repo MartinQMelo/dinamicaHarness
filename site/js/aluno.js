@@ -6,6 +6,8 @@ import {
 import { auth, db } from './firebase-config.js';
 import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
 import { criarEditor } from './editor.js';
+import { nomeDaFase } from './fases.js';
+import { acompanharCronometro } from './cronometro.js';
 
 // Fases em que o grupo edita a tela, e de qual rodada é a tela.
 const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
@@ -79,7 +81,11 @@ function acompanharGrupo(sala, uid, gid) {
 function acompanharFase(sala, uid, gid) {
   let editor = null;
   onValue(ref(db, `salas/${sala}/config/frase`), (s) => { $('frase-tarefa').textContent = s.val() || ''; });
+  acompanharCronometro(sala, $('cronometro'));
   onValue(ref(db, `salas/${sala}/estado/fase`), (s) => {
+    $('fase-aluno').textContent = nomeDaFase(s.val());
+    $('barra-fase').dataset.fase = s.val() || '';
+    $('barra-fase').hidden = false;
     const rodada = RODADA_DE_EDICAO[s.val()];
     if (!rodada) { mostrar('tela-grupo'); return; }
     editor ||= criarEditor(sala, uid);
@@ -90,6 +96,8 @@ function acompanharFase(sala, uid, gid) {
 
 function mostrarGrupo(sala, uid, aluno) {
   $('aluno-nome').textContent = aluno.nome;
+  // O apresentador removeu o aluno (ou reiniciou a sala): recomeça pela tela de nome.
+  onValue(ref(db, `salas/${sala}/alunos/${uid}`), (s) => { if (!s.exists()) location.reload(); });
   acompanharGrupo(sala, uid, aluno.grupo);
   acompanharFase(sala, uid, aluno.grupo);
 }

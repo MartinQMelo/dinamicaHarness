@@ -33,6 +33,30 @@
         <p>Sala criada: <strong id="sala-codigo" class="codigo-sala"></strong></p>
         <p>Link dos alunos: <span id="link-aluno"></span></p>
         <p><a id="link-telao" target="_blank" rel="noopener">Abrir o telão</a></p>
+
+        <h2>Fase</h2>
+        <p>Fase atual: <strong id="fase-atual" class="fase-atual"></strong></p>
+        <div class="painel-acoes">
+          <button id="botao-voltar" type="button" class="secundario">← Voltar fase</button>
+          <button id="botao-avancar" type="button">Avançar fase →</button>
+        </div>
+        <p id="proxima-fase" class="dica"></p>
+
+        <h2>Cronômetro</h2>
+        <p id="cronometro" class="cronometro" hidden></p>
+        <div class="painel-acoes">
+          <label for="minutos">Minutos</label>
+          <input id="minutos" type="number" min="0.5" max="60" step="0.5" value="5" class="campo-minutos">
+          <button id="botao-cronometro" type="button">Iniciar cronômetro</button>
+          <button id="botao-parar-cronometro" type="button" class="secundario">Parar</button>
+        </div>
+
+        <h2>Grupos</h2>
+        <p id="sem-grupos" class="dica">Nenhum aluno entrou ainda.</p>
+        <ul id="controle-grupos" class="controle-grupos"></ul>
+
+        <h2>Sala</h2>
+        <button id="botao-reiniciar" type="button" class="perigo">Reiniciar sala</button>
       </div>
     </section>
   </main>

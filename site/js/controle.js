@@ -1,11 +1,16 @@
-// Controle do apresentador: login com e-mail e senha e criação de sala.
+// Controle do apresentador: login, criação de sala, fases, cronômetro e grupos.
 import {
   signInWithEmailAndPassword, signOut, onAuthStateChanged,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-  ref, get, set, serverTimestamp,
+  ref, get, set, update, onValue, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 import { auth, db } from './firebase-config.js';
+import {
+  nomeDaFase, proximaFase, faseAnterior, atualizacaoDeFase, atualizacaoDeReinicio,
+} from './fases.js';
+import { acompanharCronometro, agoraNoServidor } from './cronometro.js';
+import { contarMembros } from './grupos.js';
 
 export const FRASE_R1 = 'Monte a tela inicial de um app de caronas para alunos da UnB.';
 export const TAMANHO_GRUPO_PADRAO = 5;
@@ -50,12 +55,99 @@ function mostrar(secao) {
   for (const id of ['tela-login', 'tela-painel']) $(id).hidden = id !== secao;
 }
 
-function mostrarSala(codigo) {
+let sala = null; // código da sala aberta; também fica na URL (?sala=) para sobreviver ao recarregar
+let pararSala = [];
+
+function desenharFase(fase) {
+  const proxima = proximaFase(fase);
+  $('fase-atual').textContent = nomeDaFase(fase);
+  $('fase-atual').dataset.fase = fase || '';
+  $('botao-avancar').disabled = !proxima;
+  $('botao-voltar').disabled = !faseAnterior(fase);
+  $('proxima-fase').textContent = proxima ? `Próxima: ${nomeDaFase(proxima)}` : 'Última fase.';
+}
+
+function desenharGrupos(grupos, alunos) {
+  const lista = Object.entries(grupos || {}).sort(([, a], [, b]) => a.ordem - b.ordem);
+  $('sem-grupos').hidden = lista.length > 0;
+  $('controle-grupos').replaceChildren(...lista.map(([gid, g]) => {
+    const li = document.createElement('li');
+    li.dataset.gid = gid;
+    li.style.setProperty('--cor-grupo', g.cor);
+    const titulo = document.createElement('p');
+    titulo.className = 'controle-grupo-nome';
+    const n = contarMembros(g);
+    titulo.textContent = `${g.nome} · ${n} ${n === 1 ? 'aluno' : 'alunos'}`;
+    const membros = document.createElement('ul');
+    const chegada = (uid) => alunos?.[uid]?.entrouEm ?? Infinity;
+    const uids = Object.keys(g.membros || {}).sort((a, b) => chegada(a) - chegada(b));
+    membros.append(...uids.map((uid) => {
+      const m = document.createElement('li');
+      m.dataset.uid = uid;
+      const nome = alunos?.[uid]?.nome || '(sem nome)';
+      const rotulo = document.createElement('span');
+      rotulo.textContent = nome;
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'perigo';
+      botao.textContent = 'Remover';
+      botao.setAttribute('aria-label', `Remover ${nome} do grupo ${g.nome}`);
+      botao.addEventListener('click', () => removerAluno(gid, uid, nome));
+      m.append(rotulo, ' ', botao);
+      return m;
+    }));
+    li.append(titulo, membros);
+    return li;
+  }));
+}
+
+// O aluno sai do grupo e perde o registro; o celular volta à tela de nome e entra de novo.
+async function removerAluno(gid, uid, nome) {
+  if (!confirm(`Remover ${nome} do grupo?`)) return;
+  await executar(() => update(ref(db, `salas/${sala}`), {
+    [`grupos/${gid}/membros/${uid}`]: null,
+    [`alunos/${uid}`]: null,
+  }));
+}
+
+async function irParaFase(para) {
+  if (!para) return;
+  const [grupos, telas] = (await Promise.all([
+    get(ref(db, `salas/${sala}/grupos`)), get(ref(db, `salas/${sala}/telas`)),
+  ])).map((s) => s.val());
+  await update(ref(db, `salas/${sala}`), atualizacaoDeFase(para, { grupos, telas }, serverTimestamp()));
+}
+
+async function executar(acao) {
+  $('erro-painel').textContent = '';
+  try {
+    await acao();
+  } catch {
+    $('erro-painel').textContent = 'Não foi possível gravar. Confira a conexão e tente de novo.';
+  }
+}
+
+function abrirSala(codigo) {
+  for (const parar of pararSala) parar();
+  sala = codigo;
   $('sala-codigo').textContent = codigo;
   const base = new URL('.', location.href);
   $('link-telao').href = new URL(`telao.html?sala=${codigo}`, base).href;
   $('link-aluno').textContent = new URL(`index.html?sala=${codigo}`, base).href;
   $('sala-criada').hidden = false;
+  history.replaceState(null, '', `?sala=${codigo}`);
+
+  let fase = null;
+  let grupos = {};
+  let alunos = {};
+  pararSala = [
+    onValue(ref(db, `salas/${codigo}/estado/fase`), (s) => { fase = s.val(); desenharFase(fase); }),
+    onValue(ref(db, `salas/${codigo}/grupos`), (s) => { grupos = s.val() || {}; desenharGrupos(grupos, alunos); }),
+    onValue(ref(db, `salas/${codigo}/alunos`), (s) => { alunos = s.val() || {}; desenharGrupos(grupos, alunos); }),
+    acompanharCronometro(codigo, $('cronometro')),
+  ];
+  $('botao-avancar').onclick = () => executar(() => irParaFase(proximaFase(fase)));
+  $('botao-voltar').onclick = () => executar(() => irParaFase(faseAnterior(fase)));
 }
 
 export function iniciarControle() {
@@ -77,12 +169,26 @@ export function iniciarControle() {
     $('erro-painel').textContent = '';
     $('botao-criar-sala').disabled = true;
     try {
-      mostrarSala(await criarSala());
+      abrirSala(await criarSala());
     } catch {
       $('erro-painel').textContent = 'Não foi possível criar a sala. Confira se seu e-mail está cadastrado como admin.';
     } finally {
       $('botao-criar-sala').disabled = false;
     }
+  });
+
+  $('botao-reiniciar').addEventListener('click', () => {
+    if (!confirm(`Reiniciar a sala ${sala}? Todos os alunos, grupos e telas serão apagados.`)) return;
+    executar(() => update(ref(db, `salas/${sala}`), atualizacaoDeReinicio(serverTimestamp())));
+  });
+
+  $('botao-cronometro').addEventListener('click', () => {
+    const minutos = Number($('minutos').value);
+    if (!(minutos > 0)) { $('erro-painel').textContent = 'Informe os minutos do cronômetro.'; return; }
+    executar(() => set(ref(db, `salas/${sala}/estado/timerFim`), Math.round(agoraNoServidor() + minutos * 60_000)));
+  });
+  $('botao-parar-cronometro').addEventListener('click', () => {
+    executar(() => set(ref(db, `salas/${sala}/estado/timerFim`), 0));
   });
 
   onAuthStateChanged(auth, async (user) => {
@@ -97,5 +203,10 @@ export function iniciarControle() {
     } catch { /* sem permissão de leitura = não é admin */ }
     $('aviso-nao-admin').hidden = admin;
     $('botao-criar-sala').disabled = !admin;
+
+    const pedida = (new URLSearchParams(location.search).get('sala') || '').trim().toUpperCase();
+    if (admin && /^[A-Z0-9]{4}$/.test(pedida) && (await get(ref(db, `salas/${pedida}/estado`))).exists()) {
+      abrirSala(pedida);
+    }
   });
 }
