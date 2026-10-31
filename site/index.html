@@ -35,6 +35,36 @@
       <p id="sem-colegas">Por enquanto só você. Aguarde os colegas.</p>
       <p>Aguarde o apresentador começar.</p>
     </section>
+
+    <section id="tela-editor" class="editor" hidden>
+      <p class="faixa-grupo">Grupo <strong id="editor-grupo"></strong></p>
+      <p id="frase-tarefa" class="frase-tarefa"></p>
+      <p id="editor-aguardando">Aguardando o apresentador preparar a tela do grupo…</p>
+      <div id="editor-area" hidden>
+        <div id="editor-moldura"></div>
+        <p class="dica">Toque num componente para editar.</p>
+
+        <div id="painel-componente" class="painel-componente" hidden>
+          <p class="painel-titulo">Editando: <strong id="painel-tipo"></strong></p>
+          <label for="texto-componente">Texto do componente</label>
+          <textarea id="texto-componente" rows="3"></textarea>
+          <p id="dica-componente" class="dica"></p>
+          <div class="painel-acoes">
+            <button id="mover-cima" type="button" class="secundario">↑ Subir</button>
+            <button id="mover-baixo" type="button" class="secundario">↓ Descer</button>
+            <button id="remover" type="button" class="perigo">Remover</button>
+          </div>
+        </div>
+
+        <button id="abrir-catalogo" type="button" class="botao-largo">+ componente</button>
+        <div id="catalogo" class="catalogo" hidden>
+          <p class="painel-titulo">Escolha um componente</p>
+          <div id="catalogo-grade" class="catalogo-grade"></div>
+          <button id="fechar-catalogo" type="button" class="secundario">Fechar</button>
+        </div>
+        <p id="erro-editor" class="erro" role="alert"></p>
+      </div>
+    </section>
   </main>
   <script type="module">
     import { acompanharConexao } from './js/conexao.js';

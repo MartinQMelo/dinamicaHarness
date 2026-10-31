@@ -5,11 +5,15 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 import { auth, db } from './firebase-config.js';
 import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
+import { criarEditor } from './editor.js';
+
+// Fases em que o grupo edita a tela, e de qual rodada é a tela.
+const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
 
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo']) $(id).hidden = id !== secao;
+  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor']) $(id).hidden = id !== secao;
 }
 
 function esperarUsuario() {
@@ -55,6 +59,7 @@ function acompanharGrupo(sala, uid, gid) {
   const desenhar = () => {
     if (!grupo) return;
     $('grupo-nome').textContent = grupo.nome;
+    $('editor-grupo').textContent = grupo.nome;
     $('cartao-grupo').style.background = grupo.cor;
     document.documentElement.style.setProperty('--cor-grupo', grupo.cor);
     const colegas = Object.keys(grupo.membros || {}).filter((m) => m !== uid);
@@ -70,10 +75,23 @@ function acompanharGrupo(sala, uid, gid) {
   onValue(ref(db, `salas/${sala}/alunos`), (s) => { alunos = s.val() || {}; desenhar(); });
 }
 
+// A fase decide o que o celular mostra: espera no grupo ou o editor da tela.
+function acompanharFase(sala, uid, gid) {
+  let editor = null;
+  onValue(ref(db, `salas/${sala}/config/frase`), (s) => { $('frase-tarefa').textContent = s.val() || ''; });
+  onValue(ref(db, `salas/${sala}/estado/fase`), (s) => {
+    const rodada = RODADA_DE_EDICAO[s.val()];
+    if (!rodada) { mostrar('tela-grupo'); return; }
+    editor ||= criarEditor(sala, uid);
+    editor.mostrar(gid, rodada);
+    mostrar('tela-editor');
+  });
+}
+
 function mostrarGrupo(sala, uid, aluno) {
   $('aluno-nome').textContent = aluno.nome;
-  mostrar('tela-grupo');
   acompanharGrupo(sala, uid, aluno.grupo);
+  acompanharFase(sala, uid, aluno.grupo);
 }
 
 export async function iniciarAluno() {

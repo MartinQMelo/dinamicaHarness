@@ -55,7 +55,7 @@
         "Aluno não consegue editar a tela de outro grupo (teste de regras)",
         "site/js/tela.js renderiza a mesma tela no celular e no telão"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F06",

@@ -23,6 +23,12 @@ export async function gravarComoDono(caminho, valor) {
   if (!r.ok) throw new Error(`gravar ${caminho}: ${r.status}`);
 }
 
+// Atualização multi-caminho (PATCH) como dono, ex.: { 'telas/r1_g1': {...}, 'estado/fase': 'r1' }.
+export async function atualizarComoDono(caminho, updates) {
+  const r = await fetch(urlBanco(caminho), { method: 'PATCH', headers: DONO, body: JSON.stringify(updates) });
+  if (!r.ok) throw new Error(`atualizar ${caminho}: ${r.status}`);
+}
+
 export async function lerComoDono(caminho) {
   const r = await fetch(urlBanco(caminho), { headers: DONO });
   return r.json();

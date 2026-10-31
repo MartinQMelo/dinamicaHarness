@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F04 prontas e verificadas (passes: true). Próximo passo: feature F05 (editor de tela
-compartilhado da rodada 1 e site/js/tela.js).
+F01 a F05 prontas e verificadas (passes: true). Próximo passo: feature F06 (controle das fases e
+cronômetro). Atenção: ao entrar na r1, o controle precisa criar as telas com telasIniciais (ver F05).
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,33 @@ compartilhado da rodada 1 e site/js/tela.js).
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F05
+- Feito: site/js/tela.js (sem Firebase, importável pelos testes): CATALOGO dos 10 tipos com texto
+  padrão neutro (não entrega os critérios), operações puras adicionar/alterar/mover/remover por id,
+  listaDeComponentes (array ou objeto do banco), telasIniciais(grupos, rodada) → atualização
+  multi-caminho `telas/r{n}_{gid}: {rodada, autor, dono}`, telaDoGrupo e desenharTela (moldura de
+  celular; selo "editando: Fulano", sem mostrar o próprio aluno). site/js/editor.js: o celular
+  acompanha estado/fase (onValue); em r1 e r1_troca mostra faixa do grupo, frase de config/frase e o
+  editor. Cada mudança é uma transação em telas/{tid}/componentes (cada item tem `id`); texto grava
+  250 ms depois da digitação; foco/saída do campo grava/limpa editandoPor (uid). Telão: em r1 e
+  r1_troca mostra "Rodada 1", a frase e a tela de cada grupo (na cor do dono) com o mesmo desenharTela.
+  Regras: telas lidas por qualquer autenticado; componentes só escritos por aluno cujo grupo é o
+  `dono`, com rodada 1 e fase r1/r1_troca; itens validados (índice 0..29, tipo do catálogo, texto
+  ≤ 300, sem campos extras). dono/autor/rodada e criar tela: só o admin.
+- Como verifiquei: npm test 28/28 (5 novos em tests/f05-editor.spec.js): troca para r1 sem
+  recarregar e sem rolagem horizontal em 360 px; os 10 tipos adicionados, texto editado de cada um
+  (banco e desenho), mover e remover; dois alunos do mesmo grupo veem adicionar/editar/mover/remover
+  e o "editando: Duda" com timeout de 2 s; regras (outro grupo, dono, rodada, criar tela, tipo
+  inválido, texto longo, fora da fase → negado); HTML da moldura igual no celular e no telão e o
+  telão acompanha ao vivo. Rodei o arquivo da F05 mais 2 vezes sem falha e conferi por screenshot.
+- Problemas / decisões: tocar num componente com o campo em foco perdia o clique (o blur grava e a
+  moldura é redesenhada antes do click). Resolvido com seleção por delegação (pointerdown/pointerup
+  no mesmo id) e desenhando a moldura já com o texto pendente. Quem cria as telas da R1 é o
+  controle (F06), com telasIniciais e a fase na mesma atualização; os testes da F05 fazem isso como
+  dono. editandoPor pode ficar preso se o aluno fechar a página editando (sem onDisconnect em item
+  de lista); o selo some na próxima vez que alguém focar e sair daquele componente.
+- Próximo passo: F06. Ao avançar para r1, gravar `{...telasIniciais(grupos, 1), 'estado/fase': 'r1'}`.
 
 ### 2026-10-30 · Feature F04
 - Feito: site/js/telao.js + telao.html. O telão lê ?sala=, faz login anônimo e só lê o banco.

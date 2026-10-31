@@ -35,6 +35,32 @@
               }
             }
           }
+        },
+        "telas": {
+          ".read": "auth != null",
+          "$tid": {
+            "componentes": {
+              ".write": "auth != null && data.parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().child('dono').val() && data.parent().child('rodada').val() === 1 && (root.child('salas').child($sala).child('estado/fase').val() === 'r1' || root.child('salas').child($sala).child('estado/fase').val() === 'r1_troca')",
+              "$i": {
+                ".validate": "$i.matches(/^([0-9]|[12][0-9])$/) && newData.hasChildren(['id', 'tipo', 'texto'])",
+                "id": {
+                  ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+                },
+                "tipo": {
+                  ".validate": "newData.isString() && newData.val().matches(/^(titulo|botao|lista|filtro|busca|mapa|perfil|chat|pagamento|aviso)$/)"
+                },
+                "texto": {
+                  ".validate": "newData.isString() && newData.val().length <= 300"
+                },
+                "editandoPor": {
+                  ".validate": "newData.isString() && newData.val().length <= 128"
+                },
+                "$outro": {
+                  ".validate": false
+                }
+              }
+            }
+          }
         }
       }
     }
