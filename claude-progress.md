@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F06 prontas e verificadas (passes: true). Próximo passo: feature F07 (troca de sessão da
-rodada 1). Ponto de extensão: atualizacaoDeFase em site/js/fases.js.
+F01 a F07 prontas e verificadas (passes: true). Próximo passo: feature F08 (revelação dos
+critérios e placar da R1). Ponto de extensão: atualizacaoDeFase em site/js/fases.js.
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,34 @@ rodada 1). Ponto de extensão: atualizacaoDeFase em site/js/fases.js.
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F07
+- Feito: a troca é a passagem r1 → r1_troca, numa única atualização multi-caminho (como no modelo
+  de dados): estado/fase, telas/{tid}/dono de cada tela da R1 para o próximo grupo (proximoGrupo:
+  rotação circular por `ordem`; com 1 grupo, ele mesmo), trocas/r1_troca {tid: donoAntes} e
+  editandoPor: null nos componentes que estavam sendo editados por quem perdeu a tela. Em fases.js:
+  RODADA_DA_TROCA, proximoGrupo, atualizacaoDeTroca, atualizacaoDeDesfazerTroca; atualizacaoDeFase
+  troca só se trocas/{fase} ainda não existe (voltar da r1_avaliacao não troca de novo) e, ao ir
+  para a fase de antes da troca, restaura os donos e apaga trocas/{fase} (Decisão 2). Controle:
+  botão "Trocar sessão" visível só na r1 (faz o mesmo que "Avançar fase →"). Celular: aviso grande
+  "Sua sessão acabou. Você é um agente novo, sem memória. Continue a tela que recebeu." com botão
+  "Continuar", mostrado ao entrar na r1_troca e ao recarregar nela; o editor descarta seleção e texto
+  pendente quando a tela em mãos muda. tests/emulador.js: escutarComoDono (stream REST do banco).
+- Como verifiquei: npm test 36/36 (3 novos em tests/f07-troca.spec.js): 3 grupos rodam g1→g2→g3→g1,
+  e o stream REST recebe UM só evento patch com fase, donos, trocas e editandoPor; voltar da
+  avaliação não troca de novo; voltar para r1 desfaz (também um evento só); em 3 celulares (2 grupos)
+  o aviso aparece sem recarregar, cada um vê e edita a tela herdada (banco e telão conferidos), a
+  regra nega a tela antiga e aceita a herdada, recarregar mantém aviso e tela; com 1 grupo a tela
+  continua no g1 e a edição segue. Desligando a troca em atualizacaoDeFase, os 3 testes falham.
+  Repeti o arquivo da F07 2 vezes sem falha.
+- Problemas / decisões: o que o aluno digitou nos últimos 250 ms antes da troca se perde (a regra já
+  nega a gravação na tela antiga). Observação da F05: adicionar um componente não abre o painel dele
+  (selecionar roda antes de o item existir na lista e a seleção é limpa); é preciso tocar no
+  componente. Os testes da F07 tocam antes de escrever. Não corrigi por estar fora da F07.
+  A r2_troca (F09) provavelmente é diferente (o grupo sai antes e o controle aperta o botão já na
+  fase); por isso RODADA_DA_TROCA ainda não inclui r2_troca. Decidir na F09.
+- Próximo passo: F08. Lembrar da Decisão 1: config/criterios só existe da r1_avaliacao em diante e
+  voltar para antes apaga.
 
 ### 2026-10-30 · Feature F06
 - Feito: site/js/fases.js (sem Firebase): FASES na ordem da especificação, NOMES_DAS_FASES em

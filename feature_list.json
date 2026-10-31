@@ -75,7 +75,7 @@
         "Cada celular mostra o aviso 'Sua sessão acabou. Você é um agente novo, sem memória.' e passa a editar a tela herdada",
         "Com 1 grupo só, a troca não quebra (a tela continua com o mesmo grupo)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F08",

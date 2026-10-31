@@ -7,7 +7,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 import { auth, db } from './firebase-config.js';
 import {
-  nomeDaFase, proximaFase, faseAnterior, atualizacaoDeFase, atualizacaoDeReinicio,
+  nomeDaFase, proximaFase, faseAnterior, atualizacaoDeFase, atualizacaoDeReinicio, RODADA_DA_TROCA,
 } from './fases.js';
 import { acompanharCronometro, agoraNoServidor } from './cronometro.js';
 import { contarMembros } from './grupos.js';
@@ -65,6 +65,8 @@ function desenharFase(fase) {
   $('botao-avancar').disabled = !proxima;
   $('botao-voltar').disabled = !faseAnterior(fase);
   $('proxima-fase').textContent = proxima ? `Próxima: ${nomeDaFase(proxima)}` : 'Última fase.';
+  // A troca de sessão é a passagem para a fase de troca: muda a fase e os donos juntos.
+  $('acao-troca').hidden = !RODADA_DA_TROCA[proxima];
 }
 
 function desenharGrupos(grupos, alunos) {
@@ -112,10 +114,9 @@ async function removerAluno(gid, uid, nome) {
 
 async function irParaFase(para) {
   if (!para) return;
-  const [grupos, telas] = (await Promise.all([
-    get(ref(db, `salas/${sala}/grupos`)), get(ref(db, `salas/${sala}/telas`)),
-  ])).map((s) => s.val());
-  await update(ref(db, `salas/${sala}`), atualizacaoDeFase(para, { grupos, telas }, serverTimestamp()));
+  const [grupos, telas, trocas] = (await Promise.all(['grupos', 'telas', 'trocas']
+    .map((filho) => get(ref(db, `salas/${sala}/${filho}`))))).map((s) => s.val());
+  await update(ref(db, `salas/${sala}`), atualizacaoDeFase(para, { grupos, telas, trocas }, serverTimestamp()));
 }
 
 async function executar(acao) {
@@ -148,6 +149,9 @@ function abrirSala(codigo) {
   ];
   $('botao-avancar').onclick = () => executar(() => irParaFase(proximaFase(fase)));
   $('botao-voltar').onclick = () => executar(() => irParaFase(faseAnterior(fase)));
+  $('botao-trocar-sessao').onclick = () => {
+    if (RODADA_DA_TROCA[proximaFase(fase)]) executar(() => irParaFase(proximaFase(fase)));
+  };
 }
 
 export function iniciarControle() {

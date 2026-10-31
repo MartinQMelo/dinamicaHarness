@@ -6,7 +6,7 @@ import {
 import { auth, db } from './firebase-config.js';
 import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
 import { criarEditor } from './editor.js';
-import { nomeDaFase } from './fases.js';
+import { nomeDaFase, RODADA_DA_TROCA } from './fases.js';
 import { acompanharCronometro } from './cronometro.js';
 
 // Fases em que o grupo edita a tela, e de qual rodada é a tela.
@@ -80,12 +80,17 @@ function acompanharGrupo(sala, uid, gid) {
 // A fase decide o que o celular mostra: espera no grupo ou o editor da tela.
 function acompanharFase(sala, uid, gid) {
   let editor = null;
+  let faseAnterior;
+  $('fechar-aviso-sessao').addEventListener('click', () => { $('aviso-sessao').hidden = true; });
   onValue(ref(db, `salas/${sala}/config/frase`), (s) => { $('frase-tarefa').textContent = s.val() || ''; });
   acompanharCronometro(sala, $('cronometro'));
   onValue(ref(db, `salas/${sala}/estado/fase`), (s) => {
     $('fase-aluno').textContent = nomeDaFase(s.val());
     $('barra-fase').dataset.fase = s.val() || '';
     $('barra-fase').hidden = false;
+    // Ao chegar numa fase de troca (ou abrir a página nela), o aviso de sessão nova aparece.
+    if (s.val() !== faseAnterior) $('aviso-sessao').hidden = !RODADA_DA_TROCA[s.val()];
+    faseAnterior = s.val();
     const rodada = RODADA_DE_EDICAO[s.val()];
     if (!rodada) { mostrar('tela-grupo'); return; }
     editor ||= criarEditor(sala, uid);

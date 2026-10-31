@@ -59,3 +59,35 @@ export async function semearSala(codigo, { fase = 'lobby', tamanhoGrupo = 5 } = 
     segredo: { criterios: { c1: 'critério secreto' } },
   });
 }
+
+// Escuta um caminho pelo stream REST do banco (como dono). Cada escrita chega como um evento:
+// uma atualização multi-caminho vira um único 'patch' com todos os caminhos. parar() encerra.
+export function escutarComoDono(caminho) {
+  const eventos = [];
+  const controle = new AbortController();
+  const pronto = (async () => {
+    const r = await fetch(urlBanco(caminho), {
+      headers: { ...DONO, Accept: 'text/event-stream' }, signal: controle.signal,
+    });
+    const leitor = r.body.pipeThrough(new TextDecoderStream()).getReader();
+    let resto = '';
+    (async () => {
+      try {
+        for (;;) {
+          const { value, done } = await leitor.read();
+          if (done) return;
+          resto += value;
+          let fim;
+          while ((fim = resto.indexOf('\n\n')) >= 0) {
+            const bloco = resto.slice(0, fim);
+            resto = resto.slice(fim + 2);
+            const evento = /^event: (.*)$/m.exec(bloco)?.[1];
+            const dados = /^data: (.*)$/m.exec(bloco)?.[1];
+            if (evento === 'put' || evento === 'patch') eventos.push({ evento, ...JSON.parse(dados) });
+          }
+        }
+      } catch { /* parado */ }
+    })();
+  })();
+  return { eventos, pronto, parar: () => controle.abort() };
+}

@@ -43,7 +43,15 @@ export function criarEditor(sala, uid) {
   }
 
   function desenhar() {
+    const anterior = tela?.tid;
     tela = gid ? telaDoGrupo(telas, gid, rodada) : null;
+    if (tela?.tid !== anterior) {
+      // A tela em mãos mudou (troca de sessão): o que era da tela anterior não vale para esta.
+      clearTimeout(textoPendente?.timer);
+      textoPendente = null;
+      selecionado = null;
+      $('catalogo').hidden = true;
+    }
     $('editor-aguardando').hidden = !!tela;
     $('editor-area').hidden = !tela;
     if (!tela) return;

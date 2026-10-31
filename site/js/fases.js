@@ -35,15 +35,59 @@ export function faseAnterior(fase) {
   return i > 0 ? FASES[i - 1] : null;
 }
 
+// Fases em que acontece a troca de sessão, e de qual rodada são as telas trocadas.
+export const RODADA_DA_TROCA = { r1_troca: 1 };
+
+// Para cada grupo, o próximo na ordem (rotação circular). Com 1 grupo, ele mesmo.
+export function proximoGrupo(grupos) {
+  const gids = Object.keys(grupos || {}).sort((a, b) => grupos[a].ordem - grupos[b].ordem);
+  return Object.fromEntries(gids.map((gid, i) => [gid, gids[(i + 1) % gids.length]]));
+}
+
+// Troca de sessão: cada tela da rodada passa para o próximo grupo. Grava trocas/{fase} com o dono de
+// antes (para "voltar fase" desfazer) e apaga os "editando: Fulano" de quem perdeu a tela.
+export function atualizacaoDeTroca(fase, { grupos, telas } = {}) {
+  const rodada = RODADA_DA_TROCA[fase];
+  const proximo = proximoGrupo(grupos);
+  const updates = {};
+  const donosAntes = {};
+  for (const [tid, tela] of Object.entries(telas || {})) {
+    if (tela.rodada !== rodada || !proximo[tela.dono]) continue;
+    donosAntes[tid] = tela.dono;
+    updates[`telas/${tid}/dono`] = proximo[tela.dono];
+    for (const [i, comp] of Object.entries(tela.componentes || {})) {
+      if (comp?.editandoPor) updates[`telas/${tid}/componentes/${i}/editandoPor`] = null;
+    }
+  }
+  updates[`trocas/${fase}`] = Object.keys(donosAntes).length ? donosAntes : null;
+  return updates;
+}
+
+// Desfaz a troca gravada em trocas/{fase}: devolve cada tela que ainda existe ao dono de antes.
+export function atualizacaoDeDesfazerTroca(fase, { telas, trocas } = {}) {
+  const updates = { [`trocas/${fase}`]: null };
+  for (const [tid, dono] of Object.entries(trocas?.[fase] || {})) {
+    if (telas?.[tid]) updates[`telas/${tid}/dono`] = dono;
+  }
+  return updates;
+}
+
 // Atualização multi-caminho (relativa a salas/{sala}) para ir à fase `para`. Mudar de fase zera o
 // cronômetro. Ao entrar na r1, cria a tela em branco dos grupos que ainda não têm a sua (voltar e
-// avançar de novo não apaga o que já foi feito).
-export function atualizacaoDeFase(para, { grupos, telas } = {}, agora = Date.now()) {
+// avançar de novo não apaga o que já foi feito). Entrar numa fase de troca troca as sessões, se a
+// troca ainda não foi feita (voltar da fase seguinte não troca de novo); voltar para a fase de antes
+// da troca a desfaz.
+export function atualizacaoDeFase(para, { grupos, telas, trocas } = {}, agora = Date.now()) {
   const updates = { 'estado/fase': para, 'estado/timerFim': 0, 'estado/atualizadoEm': agora };
   if (para === 'r1') {
     for (const [caminho, tela] of Object.entries(telasIniciais(grupos, 1))) {
       if (!telas?.[caminho.slice('telas/'.length)]) updates[caminho] = tela;
     }
+  }
+  if (RODADA_DA_TROCA[para] && !trocas?.[para]) Object.assign(updates, atualizacaoDeTroca(para, { grupos, telas }));
+  const trocaSeguinte = proximaFase(para);
+  if (RODADA_DA_TROCA[trocaSeguinte] && trocas?.[trocaSeguinte]) {
+    Object.assign(updates, atualizacaoDeDesfazerTroca(trocaSeguinte, { telas, trocas }));
   }
   return updates;
 }
