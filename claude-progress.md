@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01, F02 e F03 prontas e verificadas (passes: true). Próximo passo: feature F04 (telão no
-lobby: QR code, link, contagem ao vivo).
+F01 a F04 prontas e verificadas (passes: true). Próximo passo: feature F05 (editor de tela
+compartilhado da rodada 1 e site/js/tela.js).
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +12,23 @@ lobby: QR code, link, contagem ao vivo).
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-30 · Feature F04
+- Feito: site/js/telao.js + telao.html. O telão lê ?sala=, faz login anônimo e só lê o banco.
+  No lobby mostra o QR code (qrcode-generator 1.4.4 via CDN jsDelivr `+esm`, desenhado num canvas
+  com margem branca), o link completo index.html?sala=XXXX, o código da sala, a contagem de alunos
+  e de grupos e a lista de grupos na cor de cada um, com o número de membros, tudo por onValue.
+  Fora do lobby mostra só "Fase: X" (as telas das outras fases vêm nas features delas). Sem sala
+  ou com sala inexistente mostra um aviso. Estilos .telao-* em base.css (números com 48 px).
+- Como verifiquei: npm test 23/23 (4 novos em tests/f04-telao.spec.js, telão em 1920x1080):
+  o QR é decodificado de verdade com o jsQR (devDependency, injetado na página com
+  addScriptTag) e o link lido abre a entrada da sala; alunos entram em outros contextos e a
+  contagem/lista mudam de 0 → 1 → 3 alunos e 1 → 2 grupos (Azul 2, Verde 1, nas cores certas)
+  sem recarregar (marca em window); o font-size calculado do código, das contagens e dos números
+  dos grupos é ≥ 32 px. Repeti o arquivo da F04 mais 2 vezes sem falha. Conferi por screenshot.
+- Problemas / decisões: o QR vem de CDN, como o Firebase; sem internet ele não aparece (o link
+  e o código continuam na tela). Os rótulos alternam singular/plural ("1 aluno").
+- Próximo passo: F05.
 
 ### 2026-10-30 · Ferramenta: npm run dev
 - Feito: `npm run dev` = ./init.sh + scripts/semear-dev.mjs, que cria no emulador de Auth o

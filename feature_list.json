@@ -43,7 +43,7 @@
         "A contagem de alunos e a lista de grupos atualizam sem recarregar quando alunos entram",
         "Textos do telão legíveis: números com no mínimo 32 px"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F05",

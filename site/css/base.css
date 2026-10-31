@@ -84,3 +84,43 @@ h2 { font-size: 1.1rem; margin: 20px 0 8px; }
 
 .lista-colegas { padding-left: 20px; margin: 0; }
 .lista-colegas li { padding: 2px 0; }
+
+/* Telão no lobby */
+.telao-lobby {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  align-items: flex-start;
+  font-size: 1.75rem;
+}
+
+.telao-entrada { text-align: center; }
+.telao-chamada { margin: 0 0 16px; }
+
+.qr {
+  display: block;
+  width: min(60vh, 420px);
+  height: auto;
+  margin: 0 auto;
+  image-rendering: pixelated;
+}
+
+.telao-link { word-break: break-all; margin: 16px 0; }
+
+.telao-numero { font-size: 3rem; font-weight: 800; }
+
+.telao-placar { flex: 1; min-width: 300px; }
+.telao-contagem { margin: 0 0 16px; }
+
+.telao-grupos { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; }
+.telao-grupos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 24px;
+  border-radius: 12px;
+  background: var(--cor-grupo);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}

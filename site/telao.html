@@ -10,11 +10,34 @@
 <body class="telao">
   <main>
     <h1>Você é o agente</h1>
-    <p>Telão da dinâmica.</p>
+
+    <section id="telao-sem-sala" hidden>
+      <p id="mensagem-telao-sem-sala">Abra o telão pelo link mostrado no controle.</p>
+    </section>
+
+    <section id="telao-lobby" class="telao-lobby" hidden>
+      <div class="telao-entrada">
+        <p class="telao-chamada">Entre pelo celular</p>
+        <canvas id="qr-aluno" class="qr" width="400" height="400" role="img" aria-label="QR code para entrar na sala"></canvas>
+        <p class="telao-link"><span id="link-telao"></span></p>
+        <p class="telao-chamada">Sala <strong id="telao-codigo" class="telao-numero"></strong></p>
+      </div>
+      <div class="telao-placar">
+        <p class="telao-contagem"><strong id="contagem-alunos" class="telao-numero">0</strong> <span id="rotulo-alunos">alunos</span></p>
+        <p class="telao-contagem"><strong id="contagem-grupos" class="telao-numero">0</strong> <span id="rotulo-grupos">grupos</span></p>
+        <ul id="lista-grupos" class="telao-grupos"></ul>
+      </div>
+    </section>
+
+    <section id="telao-outra-fase" hidden>
+      <p>Fase: <strong id="telao-fase"></strong></p>
+    </section>
   </main>
   <script type="module">
     import { acompanharConexao } from './js/conexao.js';
+    import { iniciarTelao } from './js/telao.js';
     acompanharConexao();
+    iniciarTelao();
   </script>
 </body>
 </html>
