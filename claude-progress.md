@@ -13,6 +13,14 @@ lobby: QR code, link, contagem ao vivo).
 - Próximo passo:
 -->
 
+### 2026-10-30 · Ferramenta: npm run dev
+- Feito: `npm run dev` = ./init.sh + scripts/semear-dev.mjs, que cria no emulador de Auth o
+  apresentador admin@teste.com / senha123 e grava admins/admin@teste,com: true. Dá para rodar de
+  novo sem erro (ignora EMAIL_EXISTS). Documentado em AGENTS.md › Comandos. Não é feature.
+- Como verifiquei: rodei npm run dev duas vezes; um teste descartável entrou no controle com essas
+  credenciais e criou uma sala; npm test 19/19.
+- Próximo passo: F04.
+
 ### 2026-10-30 · Decisão 11 (grupos) registrada na especificação
 - Feito: o apresentador aceitou a regra de grupos e o risco (sem Cloud Functions). A Decisão 11 foi
   registrada em especificacao/dinamica.md e a frase da seção Segurança, corrigida.

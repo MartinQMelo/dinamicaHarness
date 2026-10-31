@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "./init.sh && node scripts/semear-dev.mjs",
     "serve": "http-server site -p 5173 -c-1 -s",
     "emuladores": "firebase emulators:start --only auth,database --project demo-dinamica",
     "test": "playwright test"

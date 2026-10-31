@@ -14,6 +14,7 @@ A especificação completa está em `especificacao/dinamica.md`. Leia antes de c
 - `./init.sh` — instala dependências, sobe os emuladores e o servidor estático. Rode no início de toda sessão.
 - `npm test` — roda os testes end-to-end com Playwright contra os emuladores.
 - `npm run serve` — serve `site/` em http://localhost:5173.
+- `npm run dev` — roda o `./init.sh` e semeia no emulador o apresentador de teste `admin@teste.com` / `senha123`, já cadastrado em `admins/`. É só para desenvolvimento: os dados do emulador somem quando ele é reiniciado, então rode de novo depois disso.
 
 ## Como trabalhar (toda sessão)
 1. Leia `claude-progress.md` e `git log --oneline -10`.
