@@ -5,6 +5,40 @@ F01 a F14 prontas e verificadas (passes: true). Próximo passo: a próxima featu
 feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
+## Revisão 2026-11-01
+Revisão das features com passes true (F01–F14): para cada step, o teste que o prova, lido e rodado.
+`./init.sh` e `npm test` (55/55) passaram. **Nenhuma feature reprovada**; nenhum passes voltou para false.
+
+| Feature | Testes que provam os steps |
+| --- | --- |
+| F01 | `fumaca.spec.js` (serviços no ar, 3 páginas sem erro e conectadas, emuladores em localhost com token alg "none", pages.yml publica `site/`). Step 1 também conferido à mão: com emuladores e servidor derrubados, `./init.sh` subiu os três e o teste de fumaça passou. |
+| F02 | `f02-controle.spec.js`: login, "Criar sala" (4 letras, lobby), anônimo não grava estado/segredo, não lê segredo. |
+| F03 | `f03-alunos.spec.js`: entrada anônima, 12 alunos simultâneos → 5/5/2 com cor e nome, grupo e colegas no celular, recarregar mantém grupo e uid. |
+| F04 | `f04-telao.spec.js`: QR decodificado com jsQR aponta para index.html?sala=, contagem ao vivo sem recarregar, números ≥ 32 px. |
+| F05 | `f05-editor.spec.js`: frase e moldura na r1, 10 tipos (adicionar/editar/mover/remover, conferido no banco), outro aluno vê em ≤ 2 s, regras negam tela alheia, HTML da moldura igual no celular e no telão. |
+| F06 | `f06-fases.spec.js`: fase atual, avançar/voltar/reiniciar, cronômetro igual em 4 telas (inclusive celular com relógio adiantado), celulares mudam de tela sem recarregar. |
+| F07 | `f07-troca.spec.js`: troca circular num único evento do stream do banco, aviso e tela herdada nos celulares, 1 grupo não quebra. |
+| F08 | `f08-avaliacao.spec.js`: cópia segredo → config na r1_avaliacao, leitura negada antes (celular e telão), marcação na tela em mãos, média ao vivo no telão. |
+| F09 | `f09-rodada2.spec.js`: tela nova e três cartões, saída só com progress.md (interface e regras), contagem e "Forçar troca" no controle, progress.md do anterior em destaque, declaração. |
+| F10 | `f10-revisao.spec.js`: revisor ≠ autor ≠ dono (3 a 6 grupos e pelo controle), marcações do autor escondidas até enviar, resultado R1 vs R2 com vitória falsa. |
+| F11 | `f11-oficina.spec.js`: projeto da lista, AGENTS.md cortado em 8 linhas, 3 funcionalidades e primeiro passo; voto único, nunca no próprio grupo, troca de voto; telão ao vivo; .zip baixado e conferido (CRC). |
+| F12 | `f12-ensaio.spec.js`: botão cria 20 bots, bots editam/preenchem/avaliam/revisam/votam, partida completa sem erro no console. |
+| F13 | `f13-resiliencia.spec.js`: queda real de conexão e volta no grupo e na fase, entrada atrasada na r2 vê a tela atual do grupo. |
+| F14 | `f14-offline.spec.js`: as 12 fases sem nenhum pedido fora do site e com o navegador offline, apresentador faz tudo pela tela, resultado idêntico ao do telão online com os mesmos dados. |
+
+Screenshots: partida inteira no emulador (controle, 3 celulares em 360x740, telão em 1920x1080), uma
+foto por fase (13, incluindo antes e depois da troca da r2). Sem rolagem horizontal em nenhuma fase,
+nenhum erro no console, números do resultado conferidos com os dados gravados. As fotos ficaram fora
+do repositório.
+
+Observações (não reprovam nenhuma feature, porque nenhum step aprovado as pede; ficam para a F15 ou para Ideias):
+- Telão em r2_declaracao e r3 mostra só "Fase: …" em letra pequena, sem nada legível de longe. Entra
+  na F15 ("telão em todas as fases").
+- Celular no resultado mostra a tela do lobby com "Aguarde o apresentador começar.", o que é
+  enganoso nessa fase.
+- Na r3 as marcações do autor ficam escondidas só na interface: as regras deixam qualquer aluno ler
+  `telas/{tid}/declarados`. O step pede que o revisor não as veja, e a interface cumpre.
+
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
 ### AAAA-MM-DD · Feature Fxx
