@@ -7,16 +7,20 @@ import { auth, db } from './firebase-config.js';
 import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
 import { criarEditor } from './editor.js';
 import { criarAvaliacao } from './avaliacao.js';
-import { nomeDaFase, RODADA_DA_TROCA } from './fases.js';
+import { criarCartoes } from './cartoes.js';
+import { nomeDaFase } from './fases.js';
 import { acompanharCronometro } from './cronometro.js';
 
 // Fases em que o grupo edita a tela, e de qual rodada é a tela.
-const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
+const RODADA_DE_EDICAO = {
+  r1: 1, r1_troca: 1, r2: 2, r2_troca: 2,
+};
+const FASES_DOS_CARTOES = ['r2', 'r2_troca', 'r2_declaracao'];
 
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao']) {
+  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao', 'tela-declaracao']) {
     $(id).hidden = id !== secao;
   }
 }
@@ -66,6 +70,7 @@ function acompanharGrupo(sala, uid, gid) {
     $('grupo-nome').textContent = grupo.nome;
     $('editor-grupo').textContent = grupo.nome;
     $('avaliacao-grupo').textContent = grupo.nome;
+    $('declaracao-grupo').textContent = grupo.nome;
     $('cartao-grupo').style.background = grupo.cor;
     document.documentElement.style.setProperty('--cor-grupo', grupo.cor);
     const colegas = Object.keys(grupo.membros || {}).filter((m) => m !== uid);
@@ -81,29 +86,39 @@ function acompanharGrupo(sala, uid, gid) {
   onValue(ref(db, `salas/${sala}/alunos`), (s) => { alunos = s.val() || {}; desenhar(); });
 }
 
-// A fase decide o que o celular mostra: espera no grupo, o editor da tela ou a avaliação.
+// A fase decide o que o celular mostra: espera no grupo, o editor da tela (com os cartões na
+// rodada 2), a avaliação da R1 ou a declaração da R2.
 function acompanharFase(sala, uid, gid) {
   let editor = null;
   const avaliacao = criarAvaliacao(sala, gid);
-  let faseAnterior;
+  const cartoes = criarCartoes(sala, uid, gid);
+  let fase;
+  let trocaR2 = false; // na r2_troca, a troca só acontece quando o controle aperta o botão
+  let sessaoAnterior;
   $('fechar-aviso-sessao').addEventListener('click', () => { $('aviso-sessao').hidden = true; });
   onValue(ref(db, `salas/${sala}/config/frase`), (s) => { $('frase-tarefa').textContent = s.val() || ''; });
   acompanharCronometro(sala, $('cronometro'));
-  onValue(ref(db, `salas/${sala}/estado/fase`), (s) => {
-    $('fase-aluno').textContent = nomeDaFase(s.val());
-    $('barra-fase').dataset.fase = s.val() || '';
-    $('barra-fase').hidden = false;
-    // Ao chegar numa fase de troca (ou abrir a página nela), o aviso de sessão nova aparece.
-    if (s.val() !== faseAnterior) $('aviso-sessao').hidden = !RODADA_DA_TROCA[s.val()];
-    faseAnterior = s.val();
-    if (s.val() === 'r1_avaliacao') { avaliacao.mostrar(); mostrar('tela-avaliacao'); return; }
-    avaliacao.esconder();
-    const rodada = RODADA_DE_EDICAO[s.val()];
+
+  const atualizar = () => {
+    $('fase-aluno').textContent = nomeDaFase(fase);
+    $('barra-fase').dataset.fase = fase || '';
+    $('barra-fase').hidden = !fase;
+    // Ao receber uma tela herdada (ou abrir a página depois disso), o aviso de sessão nova aparece.
+    const sessao = fase === 'r1_troca' || (fase === 'r2_troca' && trocaR2) ? fase : null;
+    if (sessao !== sessaoAnterior) $('aviso-sessao').hidden = !sessao;
+    sessaoAnterior = sessao;
+    if (fase === 'r1_avaliacao') avaliacao.mostrar(); else avaliacao.esconder();
+    if (FASES_DOS_CARTOES.includes(fase)) cartoes.mostrar(fase, trocaR2); else cartoes.esconder();
+    if (fase === 'r1_avaliacao') { mostrar('tela-avaliacao'); return; }
+    if (fase === 'r2_declaracao') { mostrar('tela-declaracao'); return; }
+    const rodada = RODADA_DE_EDICAO[fase];
     if (!rodada) { mostrar('tela-grupo'); return; }
     editor ||= criarEditor(sala, uid);
     editor.mostrar(gid, rodada);
     mostrar('tela-editor');
-  });
+  };
+  onValue(ref(db, `salas/${sala}/estado/fase`), (s) => { fase = s.val(); atualizar(); });
+  onValue(ref(db, `salas/${sala}/trocas/r2_troca`), (s) => { trocaR2 = s.exists(); atualizar(); });
 }
 
 function mostrarGrupo(sala, uid, aluno) {

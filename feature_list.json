@@ -97,7 +97,7 @@
         "O grupo que herda a tela vê o progress.md do anterior em destaque",
         "Na r2_declaracao, o grupo marca os critérios que considera prontos"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F10",

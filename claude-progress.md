@@ -1,8 +1,9 @@
 # Progresso
 
 ## Estado atual
-F01 a F08 prontas e verificadas (passes: true). Próximo passo: feature F09 (rodada 2 com os
-cartões de harness). Pontos de extensão: atualizacaoDeFase (site/js/fases.js) e site/js/criterios.js.
+F01 a F09 prontas e verificadas (passes: true). Próximo passo: feature F10 (rodada 3 de revisão e
+resultado). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), site/js/criterios.js
+(mediaDeCriterios serve para declarados e revisao/aprovados) e site/js/cartoes.js.
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -12,6 +13,44 @@ cartões de harness). Pontos de extensão: atualizacaoDeFase (site/js/fases.js) 
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-31 · Feature F09
+- Feito: fases.js: RODADA_DA_TROCA inclui r2_troca (para "voltar" desfazer); TROCA_AO_ENTRAR = só
+  r1_troca (na r2_troca, entrar na fase NÃO troca: Decisão 3); ao entrar na r1 ou na r2 cria as
+  telas em branco que faltam (r2_{gid}) e apaga os `saiu` da rodada; contarProntos(telas, grupos).
+  site/js/cartoes.js (celular): cartões AGENTS.md (texto da especificação), feature_list (critérios
+  de config/criterios com caixa "pronto?" → telas/{tid}/declarados/{c}) e progress.md (≤ 280,
+  grava 250 ms depois de digitar). Na r2_troca: botão "Sair da sessão", habilitado só com o
+  progress.md preenchido; grava saiu {por, em}; depois disso o editor some ("Vocês saíram…") e o
+  progress.md fica só leitura. Depois da troca, o herdeiro vê o aviso de sessão nova e
+  "progress.md do agente anterior" em destaque acima da tela; o cartão progress.md some. Na
+  r2_declaracao, seção tela-declaracao: feature_list da tela em mãos, "N de 5 critérios prontos",
+  o progress.md anterior e a tela. aluno.js escuta trocas/r2_troca para saber se a troca já
+  aconteceu. Controle: na r2_troca, "X de N grupos prontos" e o botão "Forçar troca" (vira
+  "Trocar sessão" com todos prontos), que faz atualizacaoDeTroca('r2_troca') numa atualização; depois
+  mostra "Troca feita.". Telão: Rodada 2 com as telas e "X de N grupos prontos" na r2_troca.
+  Regras: componentes editáveis na rodada 2 em r2/r2_troca; trocas legível por autenticado;
+  progresso (string ≤ 280) só do dono, rodada 2, sem saiu, na r2 ou na r2_troca antes da troca;
+  saiu só do dono, na r2_troca antes da troca, uma vez, com por = auth.uid, em = now e progresso com
+  ao menos uma letra ou dígito; declarados/{c1..c5} booleano, só do dono, em r2/r2_troca/r2_declaracao.
+- Como verifiquei: npm test 42/42 (3 novos em tests/f09-rodada2.spec.js): telas r2 em branco e
+  cartões nos 2 celulares (360 px sem rolagem lateral), edição, feature_list e progress.md no banco,
+  telão; regras (tela de outro grupo, tela da R1, progresso 281, sair na r2 → negado). r2_troca:
+  sem troca ao entrar, sair negado sem progress.md e só com espaços, sair grava saiu, contagem
+  0 → 1 → 2 no controle e no telão, "Forçar troca"/"Trocar sessão", voltar apaga saídas, forçar com
+  1 de 2, herdeiro vê aviso e progress.md anterior (também depois de recarregar), edita a tela
+  herdada e não reescreve o progress.md; voltar desfaz a troca. r2_declaracao: herdeiro vê a marca
+  deixada pelo autor, marca/desmarca, regras (tela do outro, c9, não booleano, editar tela, r3).
+  Conferi que o teste falha sem a exigência do progress.md na regra e com a r2_troca trocando ao
+  entrar. Repeti o arquivo da F09 2 vezes sem falha; conferi por screenshot em 360 px.
+- Problemas / decisões: o regex das regras do RTDB não aceita \S e lê \t/\n como letras; por isso
+  "preenchido" = tem letra ou dígito ([a-zA-Z0-9]), igual na página e no banco. A feature_list é
+  editável pelo dono desde a r2 (é estado compartilhado, como o feature_list.json de verdade); na
+  r2_declaracao quem marca é quem tem a tela (Decisão 4). Avançar da r2_troca sem apertar a troca
+  apenas avança (a troca nunca é automática). As regras não impedem editar componentes depois de
+  sair; só a interface esconde o editor. Com 1 grupo, a troca da r2 devolve a tela ao próprio grupo.
+- Próximo passo: F10. A revisão usa telas/{tid}/revisao {revisor, aprovados, enviadoEm} (Decisão 5:
+  dono não muda); declarados já está no banco para o resultado.
 
 ### 2026-10-31 · Feature F08
 - Feito: fases.js › criteriosRevelados(fase) (r1_avaliacao em diante) e atualizacaoDeFase recebe

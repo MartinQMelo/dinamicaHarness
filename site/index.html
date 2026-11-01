@@ -48,6 +48,12 @@
         <button id="fechar-aviso-sessao" type="button" class="botao-largo">Continuar</button>
       </div>
       <p id="frase-tarefa" class="frase-tarefa"></p>
+      <div id="progresso-anterior" class="progresso-anterior" hidden>
+        <p class="cartao-titulo">progress.md do agente anterior</p>
+        <p id="progresso-anterior-texto" class="progresso-texto"></p>
+      </div>
+      <p id="sessao-encerrada" class="sessao-encerrada" hidden>Vocês saíram da sessão. Aguardem o apresentador trocar as telas.</p>
+      <div id="editor-sessao">
       <p id="editor-aguardando">Aguardando o apresentador preparar a tela do grupo…</p>
       <div id="editor-area" hidden>
         <div id="editor-moldura"></div>
@@ -72,6 +78,46 @@
           <button id="fechar-catalogo" type="button" class="secundario">Fechar</button>
         </div>
         <p id="erro-editor" class="erro" role="alert"></p>
+      </div>
+      </div>
+
+      <div id="cartoes-r2" class="cartoes" hidden>
+        <article class="cartao">
+          <h2 class="cartao-titulo">AGENTS.md</h2>
+          <p id="texto-agents"></p>
+        </article>
+        <article class="cartao">
+          <h2 class="cartao-titulo">feature_list</h2>
+          <ul id="features-r2" class="lista-criterios"></ul>
+        </article>
+        <article id="cartao-progresso" class="cartao">
+          <h2 class="cartao-titulo">progress.md</h2>
+          <label for="progresso">O que vocês fizeram e o que falta</label>
+          <textarea id="progresso" rows="4" maxlength="280"></textarea>
+          <p id="progresso-contagem" class="dica"></p>
+          <div id="saida-sessao" hidden>
+            <button id="botao-sair-sessao" type="button" class="botao-largo">Sair da sessão</button>
+            <p id="dica-sair" class="dica"></p>
+          </div>
+        </article>
+        <p id="erro-cartoes" class="erro" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="tela-declaracao" class="avaliacao" hidden>
+      <p class="faixa-grupo">Grupo <strong id="declaracao-grupo"></strong></p>
+      <h2>O agente diz que terminou</h2>
+      <p>Marquem na feature_list os critérios que vocês consideram prontos na tela em mãos.</p>
+      <div id="declaracao-anterior" class="progresso-anterior" hidden>
+        <p class="cartao-titulo">progress.md do agente anterior</p>
+        <p id="declaracao-anterior-texto" class="progresso-texto"></p>
+      </div>
+      <p id="declaracao-aguardando">Aguardando a tela do grupo…</p>
+      <div id="declaracao-area" hidden>
+        <ul id="declaracao-features" class="lista-criterios"></ul>
+        <p id="declaracao-total" class="avaliacao-total"></p>
+        <h3>A tela em mãos</h3>
+        <div id="declaracao-moldura"></div>
       </div>
     </section>
 

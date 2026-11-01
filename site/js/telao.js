@@ -5,13 +5,15 @@ import qrcode from 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm';
 import { auth, db } from './firebase-config.js';
 import { contarMembros } from './grupos.js';
 import { desenharTela } from './tela.js';
-import { nomeDaFase } from './fases.js';
+import { nomeDaFase, contarProntos } from './fases.js';
 import {
   listaDeCriterios, contarMarcados, mediaDeCriterios, formatarMedia,
 } from './criterios.js';
 import { acompanharCronometro } from './cronometro.js';
 
-const RODADA_DE_EDICAO = { r1: 1, r1_troca: 1 };
+const RODADA_DE_EDICAO = {
+  r1: 1, r1_troca: 1, r2: 2, r2_troca: 2,
+};
 
 const $ = (id) => document.getElementById(id);
 
@@ -90,6 +92,14 @@ function desenharTelas(telas, grupos, alunos, rodada) {
   }));
 }
 
+// Na r2_troca: quantos grupos já saíram da sessão (Decisão 3).
+function desenharProntos(telas, grupos, fase) {
+  $('telao-prontos').hidden = fase !== 'r2_troca';
+  const { prontos, total } = contarProntos(telas, grupos);
+  $('telao-prontos-n').textContent = `${prontos} de ${total}`;
+  $('telao-prontos-rotulo').textContent = total === 1 ? 'grupo pronto' : 'grupos prontos';
+}
+
 // Placar da R1: a média de critérios cumpridos, os critérios revelados e quanto cada tela cumpriu.
 function desenharPlacarR1(telas, grupos, criterios) {
   const total = listaDeCriterios(criterios).length || 5;
@@ -133,6 +143,7 @@ export async function iniciarTelao() {
 
   const raiz = `salas/${sala}`;
   let rodada = null;
+  let fase = null;
   let telas = {};
   let grupos = {};
   let alunos = {};
@@ -141,6 +152,7 @@ export async function iniciarTelao() {
   let placar = false;
   const redesenhar = () => {
     if (rodada) desenharTelas(telas, grupos, alunos, rodada);
+    desenharProntos(telas, grupos, fase);
     if (placar) desenharPlacarR1(telas, grupos, criterios);
   };
   // config/criterios só pode ser lido da r1_avaliacao em diante: escuta só enquanto mostra o placar.
@@ -157,6 +169,7 @@ export async function iniciarTelao() {
 
   onValue(ref(db, `${raiz}/estado`), (s) => {
     const estado = s.val();
+    fase = estado?.fase || null;
     document.body.dataset.fase = estado?.fase || '';
     placar = estado?.fase === 'r1_avaliacao';
     escutarCriterios(placar);

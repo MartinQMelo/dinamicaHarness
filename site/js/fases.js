@@ -41,7 +41,20 @@ export function criteriosRevelados(fase) {
 }
 
 // Fases em que acontece a troca de sessão, e de qual rodada são as telas trocadas.
-export const RODADA_DA_TROCA = { r1_troca: 1 };
+export const RODADA_DA_TROCA = { r1_troca: 1, r2_troca: 2 };
+
+// Fases cuja troca acontece ao entrar nelas. Na r2_troca, a troca é um botão do controle, apertado
+// depois que os grupos saem da sessão (Decisão 3); entrar na fase não troca.
+export const TROCA_AO_ENTRAR = ['r1_troca'];
+
+// Fases que dão a cada grupo uma tela nova em branco, e de qual rodada.
+const RODADA_NOVA = { r1: 1, r2: 2 };
+
+// Grupos prontos na r2_troca: telas da rodada 2 com dono num grupo e quantas já têm `saiu`.
+export function contarProntos(telas, grupos) {
+  const lista = Object.values(telas || {}).filter((t) => t.rodada === 2 && grupos?.[t.dono]);
+  return { prontos: lista.filter((t) => t.saiu).length, total: lista.length };
+}
 
 // Para cada grupo, o próximo na ordem (rotação circular). Com 1 grupo, ele mesmo.
 export function proximoGrupo(grupos) {
@@ -78,10 +91,11 @@ export function atualizacaoDeDesfazerTroca(fase, { telas, trocas } = {}) {
 }
 
 // Atualização multi-caminho (relativa a salas/{sala}) para ir à fase `para`. Mudar de fase zera o
-// cronômetro. Ao entrar na r1, cria a tela em branco dos grupos que ainda não têm a sua (voltar e
-// avançar de novo não apaga o que já foi feito). Entrar numa fase de troca troca as sessões, se a
+// cronômetro. Ao entrar na r1 ou na r2, cria a tela em branco dos grupos que ainda não têm a sua da
+// rodada (voltar e avançar de novo não apaga o que já foi feito) e apaga os `saiu` das telas da rodada
+// (voltar da r2_troca deixa os grupos saírem de novo). Entrar na r1_troca troca as sessões, se a
 // troca ainda não foi feita (voltar da fase seguinte não troca de novo); voltar para a fase de antes
-// da troca a desfaz. Da r1_avaliacao em diante, config/criterios é a cópia de segredo/criterios; antes
+// de uma troca a desfaz. Da r1_avaliacao em diante, config/criterios é a cópia de segredo/criterios; antes
 // dela, é apagado se existir (os alunos não podem ler os critérios antes da hora).
 export function atualizacaoDeFase(para, {
   grupos, telas, trocas, segredo, config,
@@ -89,12 +103,16 @@ export function atualizacaoDeFase(para, {
   const updates = { 'estado/fase': para, 'estado/timerFim': 0, 'estado/atualizadoEm': agora };
   if (criteriosRevelados(para)) updates['config/criterios'] = segredo?.criterios || null;
   else if (config?.criterios) updates['config/criterios'] = null;
-  if (para === 'r1') {
-    for (const [caminho, tela] of Object.entries(telasIniciais(grupos, 1))) {
+  const rodadaNova = RODADA_NOVA[para];
+  if (rodadaNova) {
+    for (const [caminho, tela] of Object.entries(telasIniciais(grupos, rodadaNova))) {
       if (!telas?.[caminho.slice('telas/'.length)]) updates[caminho] = tela;
     }
+    for (const [tid, tela] of Object.entries(telas || {})) {
+      if (tela.rodada === rodadaNova && tela.saiu) updates[`telas/${tid}/saiu`] = null;
+    }
   }
-  if (RODADA_DA_TROCA[para] && !trocas?.[para]) Object.assign(updates, atualizacaoDeTroca(para, { grupos, telas }));
+  if (TROCA_AO_ENTRAR.includes(para) && !trocas?.[para]) Object.assign(updates, atualizacaoDeTroca(para, { grupos, telas }));
   const trocaSeguinte = proximaFase(para);
   if (RODADA_DA_TROCA[trocaSeguinte] && trocas?.[trocaSeguinte]) {
     Object.assign(updates, atualizacaoDeDesfazerTroca(trocaSeguinte, { telas, trocas }));

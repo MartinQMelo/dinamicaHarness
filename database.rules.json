@@ -48,7 +48,7 @@
           ".read": "auth != null",
           "$tid": {
             "componentes": {
-              ".write": "auth != null && data.parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().child('dono').val() && data.parent().child('rodada').val() === 1 && (root.child('salas').child($sala).child('estado/fase').val() === 'r1' || root.child('salas').child($sala).child('estado/fase').val() === 'r1_troca')",
+              ".write": "auth != null && data.parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().child('dono').val() && ((data.parent().child('rodada').val() === 1 && root.child('salas').child($sala).child('estado/fase').val().matches(/^(r1|r1_troca)$/)) || (data.parent().child('rodada').val() === 2 && root.child('salas').child($sala).child('estado/fase').val().matches(/^(r2|r2_troca)$/)))",
               "$i": {
                 ".validate": "$i.matches(/^([0-9]|[12][0-9])$/) && newData.hasChildren(['id', 'tipo', 'texto'])",
                 "id": {
@@ -73,8 +73,34 @@
                 ".write": "auth != null && data.parent().parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().parent().child('dono').val() && data.parent().parent().child('rodada').val() === 1 && root.child('salas').child($sala).child('estado/fase').val() === 'r1_avaliacao'",
                 ".validate": "$c.matches(/^c[1-5]$/) && newData.isBoolean()"
               }
+            },
+            "declarados": {
+              "$c": {
+                ".write": "auth != null && data.parent().parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().parent().child('dono').val() && data.parent().parent().child('rodada').val() === 2 && root.child('salas').child($sala).child('estado/fase').val().matches(/^(r2|r2_troca|r2_declaracao)$/)",
+                ".validate": "$c.matches(/^c[1-5]$/) && newData.isBoolean()"
+              }
+            },
+            "progresso": {
+              ".write": "auth != null && data.parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().child('dono').val() && data.parent().child('rodada').val() === 2 && !data.parent().child('saiu').exists() && (root.child('salas').child($sala).child('estado/fase').val() === 'r2' || (root.child('salas').child($sala).child('estado/fase').val() === 'r2_troca' && !root.child('salas').child($sala).child('trocas/r2_troca').exists()))",
+              ".validate": "newData.isString() && newData.val().length <= 280"
+            },
+            "saiu": {
+              ".write": "auth != null && data.parent().child('dono').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().child('dono').val() && data.parent().child('rodada').val() === 2 && root.child('salas').child($sala).child('estado/fase').val() === 'r2_troca' && !root.child('salas').child($sala).child('trocas/r2_troca').exists() && !data.exists() && data.parent().child('progresso').isString() && data.parent().child('progresso').val().matches(/[a-zA-Z0-9]/)",
+              ".validate": "newData.hasChildren(['por', 'em'])",
+              "por": {
+                ".validate": "newData.val() === auth.uid"
+              },
+              "em": {
+                ".validate": "newData.val() === now"
+              },
+              "$outro": {
+                ".validate": false
+              }
             }
           }
+        },
+        "trocas": {
+          ".read": "auth != null"
         }
       }
     }

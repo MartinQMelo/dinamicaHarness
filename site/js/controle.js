@@ -7,7 +7,8 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 import { auth, db } from './firebase-config.js';
 import {
-  nomeDaFase, proximaFase, faseAnterior, atualizacaoDeFase, atualizacaoDeReinicio, RODADA_DA_TROCA,
+  nomeDaFase, proximaFase, faseAnterior, atualizacaoDeFase, atualizacaoDeReinicio, atualizacaoDeTroca,
+  contarProntos, TROCA_AO_ENTRAR,
 } from './fases.js';
 import { acompanharCronometro, agoraNoServidor } from './cronometro.js';
 import { contarMembros } from './grupos.js';
@@ -65,8 +66,29 @@ function desenharFase(fase) {
   $('botao-avancar').disabled = !proxima;
   $('botao-voltar').disabled = !faseAnterior(fase);
   $('proxima-fase').textContent = proxima ? `Próxima: ${nomeDaFase(proxima)}` : 'Última fase.';
-  // A troca de sessão é a passagem para a fase de troca: muda a fase e os donos juntos.
-  $('acao-troca').hidden = !RODADA_DA_TROCA[proxima];
+  // Na R1, a troca de sessão é a passagem para a fase de troca: muda a fase e os donos juntos.
+  $('acao-troca').hidden = !TROCA_AO_ENTRAR.includes(proxima);
+}
+
+// Na r2_troca, os grupos saem da sessão e o apresentador troca as telas quando quiser (Decisão 3).
+function desenharTrocaR2(fase, telas, grupos, trocas) {
+  $('acao-troca-r2').hidden = fase !== 'r2_troca';
+  const { prontos, total } = contarProntos(telas, grupos);
+  $('controle-prontos').textContent = `${prontos} de ${total} ${total === 1 ? 'grupo pronto' : 'grupos prontos'}`;
+  const feita = !!trocas?.r2_troca;
+  const botao = $('botao-trocar-r2');
+  botao.hidden = feita;
+  botao.textContent = prontos === total ? 'Trocar sessão' : 'Forçar troca';
+  $('dica-troca-r2').textContent = feita
+    ? 'Troca feita. Voltar para a Rodada 2 desfaz a troca.'
+    : 'Cada tela passa para o próximo grupo, mesmo a de quem ainda não saiu.';
+}
+
+async function trocarSessaoR2() {
+  const [estado, grupos, telas, trocas] = (await Promise.all(['estado', 'grupos', 'telas', 'trocas']
+    .map((filho) => get(ref(db, `salas/${sala}/${filho}`))))).map((s) => s.val());
+  if (estado?.fase !== 'r2_troca' || trocas?.r2_troca) return;
+  await update(ref(db, `salas/${sala}`), atualizacaoDeTroca('r2_troca', { grupos, telas }));
 }
 
 function desenharGrupos(grupos, alunos) {
@@ -143,17 +165,27 @@ function abrirSala(codigo) {
   let fase = null;
   let grupos = {};
   let alunos = {};
+  let telas = {};
+  let trocas = {};
+  const desenharTroca = () => desenharTrocaR2(fase, telas, grupos, trocas);
   pararSala = [
-    onValue(ref(db, `salas/${codigo}/estado/fase`), (s) => { fase = s.val(); desenharFase(fase); }),
-    onValue(ref(db, `salas/${codigo}/grupos`), (s) => { grupos = s.val() || {}; desenharGrupos(grupos, alunos); }),
+    onValue(ref(db, `salas/${codigo}/estado/fase`), (s) => { fase = s.val(); desenharFase(fase); desenharTroca(); }),
+    onValue(ref(db, `salas/${codigo}/grupos`), (s) => {
+      grupos = s.val() || {};
+      desenharGrupos(grupos, alunos);
+      desenharTroca();
+    }),
+    onValue(ref(db, `salas/${codigo}/telas`), (s) => { telas = s.val() || {}; desenharTroca(); }),
+    onValue(ref(db, `salas/${codigo}/trocas`), (s) => { trocas = s.val() || {}; desenharTroca(); }),
     onValue(ref(db, `salas/${codigo}/alunos`), (s) => { alunos = s.val() || {}; desenharGrupos(grupos, alunos); }),
     acompanharCronometro(codigo, $('cronometro')),
   ];
   $('botao-avancar').onclick = () => executar(() => irParaFase(proximaFase(fase)));
   $('botao-voltar').onclick = () => executar(() => irParaFase(faseAnterior(fase)));
   $('botao-trocar-sessao').onclick = () => {
-    if (RODADA_DA_TROCA[proximaFase(fase)]) executar(() => irParaFase(proximaFase(fase)));
+    if (TROCA_AO_ENTRAR.includes(proximaFase(fase))) executar(() => irParaFase(proximaFase(fase)));
   };
+  $('botao-trocar-r2').onclick = () => executar(trocarSessaoR2);
 }
 
 export function iniciarControle() {
