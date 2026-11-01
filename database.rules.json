@@ -113,6 +113,48 @@
         },
         "trocas": {
           ".read": "auth != null"
+        },
+        "oficina": {
+          ".read": "auth != null",
+          "$gid": {
+            ".write": "auth != null && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === $gid && root.child('salas').child($sala).child('estado/fase').val() === 'oficina'",
+            "projeto": {
+              ".validate": "newData.isString() && newData.val().matches(/^(ru|caronas|provas|atletica)$/)"
+            },
+            "agents": {
+              ".validate": "newData.isString() && newData.val().length <= 800 && newData.val().length - newData.val().replace('\\n', '').length <= 7"
+            },
+            "features": {
+              "$i": {
+                ".validate": "$i.matches(/^[0-2]$/)",
+                "nome": {
+                  ".validate": "newData.isString() && newData.val().length <= 80"
+                },
+                "aceite": {
+                  ".validate": "newData.isString() && newData.val().length <= 200"
+                },
+                "evidencia": {
+                  ".validate": "newData.isString() && newData.val().length <= 200"
+                },
+                "$outro": {
+                  ".validate": false
+                }
+              }
+            },
+            "progresso": {
+              ".validate": "newData.isString() && newData.val().length <= 280"
+            },
+            "$outro": {
+              ".validate": false
+            }
+          }
+        },
+        "votos": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('salas').child($sala).child('estado/fase').val() === 'votacao' && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').isString()",
+            ".validate": "newData.isString() && root.child('salas').child($sala).child('grupos').child(newData.val()).exists() && root.child('salas').child($sala).child('oficina').child(newData.val()).exists() && newData.val() !== root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val()"
+          }
         }
       }
     }

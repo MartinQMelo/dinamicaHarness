@@ -137,6 +137,47 @@
       </div>
     </section>
 
+    <section id="tela-oficina" class="oficina" hidden>
+      <p class="faixa-grupo">Grupo <strong id="oficina-grupo"></strong></p>
+      <h2>Monte seu harness</h2>
+      <p>Escolham um projeto e escrevam o harness que vocês dariam a um agente. Todo o grupo edita junto.</p>
+      <label for="oficina-projeto">Projeto</label>
+      <select id="oficina-projeto" data-campo="projeto"></select>
+      <article class="cartao">
+        <h3 class="cartao-titulo">AGENTS.md</h3>
+        <label for="oficina-agents">Regras para o agente (até 8 linhas)</label>
+        <textarea id="oficina-agents" data-campo="agents" rows="8"></textarea>
+        <p id="oficina-agents-linhas" class="dica"></p>
+      </article>
+      <article class="cartao">
+        <h3 class="cartao-titulo">feature_list</h3>
+        <p class="dica">3 funcionalidades, cada uma com o critério de aceite e a evidência de que está pronta.</p>
+        <div id="oficina-features"></div>
+      </article>
+      <article class="cartao">
+        <h3 class="cartao-titulo">progress.md</h3>
+        <label for="oficina-progresso">O primeiro passo</label>
+        <textarea id="oficina-progresso" data-campo="progresso" rows="3"></textarea>
+        <p id="oficina-progresso-contagem" class="dica"></p>
+      </article>
+      <p id="erro-oficina" class="erro" role="alert"></p>
+    </section>
+
+    <section id="tela-votacao" class="votacao" hidden>
+      <p class="faixa-grupo">Grupo <strong id="votacao-grupo"></strong></p>
+      <h2>Votação</h2>
+      <p>Vote no melhor harness. Não vale votar no próprio grupo; dá para trocar o voto até o fim.</p>
+      <p id="votacao-encerrada" class="sessao-encerrada" hidden>Votação encerrada.</p>
+      <p id="votacao-meu-voto" class="avaliacao-total"></p>
+      <p id="erro-votacao" class="erro" role="alert"></p>
+      <p id="votacao-vazia" hidden>Nenhum outro grupo montou um harness.</p>
+      <ul id="votacao-harnesses" class="lista-harnesses"></ul>
+      <div id="votacao-proprio-bloco" hidden>
+        <h3>O harness do seu grupo</h3>
+        <div id="votacao-proprio"></div>
+      </div>
+    </section>
+
     <section id="tela-avaliacao" class="avaliacao" hidden>
       <p class="faixa-grupo">Grupo <strong id="avaliacao-grupo"></strong></p>
       <h2>Os critérios eram estes</h2>

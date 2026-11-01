@@ -392,3 +392,34 @@ body.telao main { position: relative; }
 .telao-resultado-telas { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; }
 .telao-resultado-telas li { padding: 12px 24px; border-radius: 12px; border-left: 12px solid var(--cor-grupo); background: rgba(255, 255, 255, 0.08); }
 .telao-resultado-telas p { margin: 0; }
+
+/* Oficina e votação (celular), harnesses e votos (telão). */
+select { font: inherit; width: 100%; padding: 10px 12px; border: 1px solid #b6bcc6; border-radius: 8px; background: #fff; margin: 4px 0 12px; }
+.oficina .cartao { margin-bottom: 12px; }
+.oficina textarea { width: 100%; font: inherit; }
+.oficina-feature { margin: 0 0 12px; padding: 8px 10px; border: 1px solid #d0d7de; border-radius: 8px; display: grid; gap: 4px; min-width: 0; }
+.oficina-feature legend { font-weight: 700; padding: 0 4px; }
+.lista-harnesses { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 12px; }
+.harness {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-top: 8px solid var(--cor-grupo);
+  overflow-wrap: anywhere;
+}
+.harness p { margin: 0 0 6px; }
+.harness-grupo { font-weight: 800; color: var(--cor-grupo); font-size: 1.15rem; }
+.harness-projeto { font-weight: 700; }
+.harness-agents, .harness-progresso { white-space: pre-wrap; }
+.harness-features { margin: 0 0 8px; padding-left: 1.4em; }
+.harness-features li { margin-bottom: 4px; }
+.harness-detalhe { display: block; font-size: 0.9em; }
+.botao-voto { margin-top: 8px; }
+.telao-oficina { font-size: 1.4rem; }
+.telao-harnesses { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
+body.telao .harness { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); border-top-color: var(--cor-grupo); color: inherit; }
+body.telao .harness-grupo { color: #fff; background: var(--cor-grupo); display: inline-block; padding: 2px 16px; border-radius: 8px; font-size: 1.75rem; }
+.telao-votos { font-size: 1.75rem; }
+.telao-harnesses li.lider .harness { outline: 6px solid #f0c000; }
+.telao-vencedor { margin: 0 0 24px; padding: 16px 24px; border-radius: 12px; background: #f0c000; color: #1b1e24; font-size: 3rem; font-weight: 800; }

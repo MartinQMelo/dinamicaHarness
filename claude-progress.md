@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F10 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
-feature_list.json (oficina). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
+F01 a F11 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
+feature_list.json (F12, modo ensaio com alunos-bot). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
 ## Sessões
@@ -13,6 +13,49 @@ feature_list.json (oficina). Pontos de extensão: atualizacaoDeFase (site/js/fas
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-31 · Feature F11
+- Feito: site/js/harness.js (sem Firebase): PROJETOS (chaves ru, caronas, provas, atletica), limites
+  (AGENTS.md 8 linhas/800, nome 80, aceite e evidência 200, progresso 280), limitarLinhas,
+  funcionalidades (aceita features como lista ou objeto), harnessesDaSala, contarVotos (só voto de
+  aluno que ainda está na sala, num harness que existe, de outro grupo), lideres, vencedorDe (único
+  líder ou estado/vencedor entre os empatados: Decisão 9), arquivosDoHarness (AGENTS.md,
+  feature_list.json no formato {id, description, steps:[aceite], evidencia, passes:false} e
+  claude-progress.md com "## Primeiro passo"), nomeDoZip e desenharHarness (cartão usado no celular e
+  no telão). site/js/zip.js: .zip "stored" sem biblioteca (CRC32, nomes UTF-8). Celular:
+  site/js/oficina.js e a seção tela-oficina (select do projeto, AGENTS.md cortado em 8 linhas com
+  "N de 8 linhas", 3 funcionalidades com aceite e evidência, primeiro passo); cada campo grava em
+  oficina/{gid}/{campo} 250 ms depois de digitar, o campo em foco não é sobrescrito. site/js/votacao.js
+  e a seção tela-votacao (votacao e fim): harnesses dos outros grupos com "Votar em X" / "Seu voto ✓
+  X", o do próprio grupo à parte sem botão; no fim, "Votação encerrada." sem botões. Telão: seção
+  telao-oficina nas fases oficina/votacao/fim com os harnesses ao vivo, "N votos" (≥ 32 px) na
+  votação e no fim, e no fim "Vencedor: X" ou "Empate entre X e Y…", com os líderes contornados.
+  Controle: na votacao e no fim, votos por grupo; no fim, o vencedor, botões "Escolher X" no empate
+  (grava estado/vencedor) e "Baixar harness vencedor (.zip)" (desabilitado enquanto há empate).
+  atualizacaoDeFase recebe estado e apaga estado/vencedor ao sair do fim; remover aluno apaga o voto.
+  Regras: oficina legível por autenticado; oficina/{gid} só do grupo e só na oficina; projeto da
+  lista, agents ≤ 800 com no máximo 7 quebras de linha, features/{0..2} com nome/aceite/evidencia,
+  progresso ≤ 280, nada além disso. votos legível por autenticado; votos/{uid} só o próprio, só na
+  votacao, só com grupo, num grupo que existe e tem harness, diferente do próprio.
+- Como verifiquei: npm test 48/48 (3 novos em tests/f11-oficina.spec.js): 3 celulares (2 no Azul,
+  1 no Verde), 360 px sem rolagem lateral; projeto e campos aparecem no colega do grupo; 10 linhas
+  viram 8 (campo e banco); banco com o harness completo; telão mostra os harnesses ao vivo sem votos;
+  regras (antes da oficina, outro grupo, 9 linhas, projeto fora da lista, 4ª funcionalidade, campos
+  extras, texto longo, voto na oficina, editar na votação → negado; 8 linhas ok). Votação com 3
+  grupos: não aparece o próprio grupo, voto e troca de voto (um registro só no banco), telão e
+  controle contando ao vivo, regras (próprio grupo, voto de outro aluno, grupo inexistente, não
+  texto, votar no fim → negado); no fim, "Vencedor: Laranja" e o .zip baixado de verdade (download do
+  Playwright), lido pelo diretório central com CRC conferido por zlib.crc32. Empate: telão com os
+  empatados, controle com download desabilitado, escolher Verde e depois Azul (zip de cada um), aluno
+  não grava estado/vencedor, voltar apaga a escolha. Conferi que os testes falham com as regras de
+  voto e de linhas abertas; validei um .zip gerado com o zipfile do Python; repeti o arquivo 2 vezes
+  sem falha; conferi por screenshot (360 px e 1920).
+- Problemas / decisões: o regex das regras lê \n como a letra n e não aceita quebra de linha literal;
+  as 8 linhas são contadas com `val.length - val.replace('\n', '').length <= 7` (string com escape
+  funciona). O projeto vai para o banco como chave (as regras não lidam bem com acento). Só grupo
+  que escreveu algo na oficina vira harness votável. Sem votos, todos empatam com 0 e o controle
+  escolhe. O texto digitado nos últimos 250 ms antes de sair da oficina se perde (como na F07).
+- Próximo passo: F12.
 
 ### 2026-10-31 · Feature F10
 - Feito: fases.js › escolherRevisores(grupos, telas): para as telas da R2 com dono num grupo, tenta um

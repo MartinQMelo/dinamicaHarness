@@ -113,11 +113,13 @@ export function escolherRevisores(grupos, telas) {
 // troca ainda não foi feita (voltar da fase seguinte não troca de novo); voltar para a fase de antes
 // de uma troca a desfaz. Entrar na r3 escolhe o revisor das telas da rodada 2 que ainda não têm um (o
 // dono não muda: Decisão 5; voltar e avançar não troca o revisor). Da r1_avaliacao em diante, config/criterios é a cópia de segredo/criterios; antes
-// dela, é apagado se existir (os alunos não podem ler os critérios antes da hora).
+// dela, é apagado se existir (os alunos não podem ler os critérios antes da hora). O vencedor escolhido
+// num empate (estado/vencedor) só vale no fim: sair dele apaga a escolha.
 export function atualizacaoDeFase(para, {
-  grupos, telas, trocas, segredo, config,
+  grupos, telas, trocas, segredo, config, estado,
 } = {}, agora = Date.now()) {
   const updates = { 'estado/fase': para, 'estado/timerFim': 0, 'estado/atualizadoEm': agora };
+  if (para !== 'fim' && estado?.vencedor) updates['estado/vencedor'] = null;
   if (criteriosRevelados(para)) updates['config/criterios'] = segredo?.criterios || null;
   else if (config?.criterios) updates['config/criterios'] = null;
   const rodadaNova = RODADA_NOVA[para];

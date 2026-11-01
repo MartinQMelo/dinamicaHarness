@@ -118,7 +118,7 @@
         "O telão mostra os harnesses e a contagem de votos ao vivo",
         "Na fase fim, o controle baixa o harness vencedor como .zip com AGENTS.md, feature_list.json e claude-progress.md"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F12",

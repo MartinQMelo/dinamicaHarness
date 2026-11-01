@@ -9,6 +9,8 @@ import { criarEditor } from './editor.js';
 import { criarAvaliacao } from './avaliacao.js';
 import { criarCartoes } from './cartoes.js';
 import { criarRevisao } from './revisao.js';
+import { criarOficina } from './oficina.js';
+import { criarVotacao } from './votacao.js';
 import { nomeDaFase } from './fases.js';
 import { acompanharCronometro } from './cronometro.js';
 
@@ -17,11 +19,12 @@ const RODADA_DE_EDICAO = {
   r1: 1, r1_troca: 1, r2: 2, r2_troca: 2,
 };
 const FASES_DOS_CARTOES = ['r2', 'r2_troca', 'r2_declaracao'];
+const FASES_DA_VOTACAO = ['votacao', 'fim']; // no fim, os harnesses continuam à vista, sem votar
 
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao', 'tela-declaracao', 'tela-revisao']) {
+  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao', 'tela-declaracao', 'tela-revisao', 'tela-oficina', 'tela-votacao']) {
     $(id).hidden = id !== secao;
   }
 }
@@ -73,6 +76,8 @@ function acompanharGrupo(sala, uid, gid) {
     $('avaliacao-grupo').textContent = grupo.nome;
     $('declaracao-grupo').textContent = grupo.nome;
     $('revisao-grupo').textContent = grupo.nome;
+    $('oficina-grupo').textContent = grupo.nome;
+    $('votacao-grupo').textContent = grupo.nome;
     $('cartao-grupo').style.background = grupo.cor;
     document.documentElement.style.setProperty('--cor-grupo', grupo.cor);
     const colegas = Object.keys(grupo.membros || {}).filter((m) => m !== uid);
@@ -89,12 +94,14 @@ function acompanharGrupo(sala, uid, gid) {
 }
 
 // A fase decide o que o celular mostra: espera no grupo, o editor da tela (com os cartões na
-// rodada 2), a avaliação da R1, a declaração da R2 ou a revisão da r3.
+// rodada 2), a avaliação da R1, a declaração da R2, a revisão da r3, a oficina ou a votação.
 function acompanharFase(sala, uid, gid) {
   let editor = null;
   const avaliacao = criarAvaliacao(sala, gid);
   const cartoes = criarCartoes(sala, uid, gid);
   const revisao = criarRevisao(sala, gid);
+  const oficina = criarOficina(sala, gid);
+  const votacao = criarVotacao(sala, uid, gid);
   let fase;
   let trocaR2 = false; // na r2_troca, a troca só acontece quando o controle aperta o botão
   let sessaoAnterior;
@@ -113,6 +120,10 @@ function acompanharFase(sala, uid, gid) {
     if (fase === 'r1_avaliacao') avaliacao.mostrar(); else avaliacao.esconder();
     if (FASES_DOS_CARTOES.includes(fase)) cartoes.mostrar(fase, trocaR2); else cartoes.esconder();
     if (fase === 'r3') revisao.mostrar(); else revisao.esconder();
+    if (fase === 'oficina') oficina.mostrar(); else oficina.esconder();
+    if (FASES_DA_VOTACAO.includes(fase)) votacao.mostrar(fase); else votacao.esconder();
+    if (fase === 'oficina') { mostrar('tela-oficina'); return; }
+    if (FASES_DA_VOTACAO.includes(fase)) { mostrar('tela-votacao'); return; }
     if (fase === 'r1_avaliacao') { mostrar('tela-avaliacao'); return; }
     if (fase === 'r3') { mostrar('tela-revisao'); return; }
     if (fase === 'r2_declaracao') { mostrar('tela-declaracao'); return; }

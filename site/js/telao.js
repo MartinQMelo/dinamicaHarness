@@ -10,15 +10,19 @@ import {
   listaDeCriterios, contarMarcados, mediaDeCriterios, formatarMedia, vitoriasFalsas,
 } from './criterios.js';
 import { acompanharCronometro } from './cronometro.js';
+import {
+  harnessesDaSala, contarVotos, lideres, vencedorDe, desenharHarness,
+} from './harness.js';
 
 const RODADA_DE_EDICAO = {
   r1: 1, r1_troca: 1, r2: 2, r2_troca: 2,
 };
+const TITULOS_DA_OFICINA = { oficina: 'Oficina · monte seu harness', votacao: 'Votação', fim: 'Fim' };
 
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['telao-sem-sala', 'telao-lobby', 'telao-rodada', 'telao-avaliacao', 'telao-resultado', 'telao-outra-fase']) {
+  for (const id of ['telao-sem-sala', 'telao-lobby', 'telao-rodada', 'telao-avaliacao', 'telao-resultado', 'telao-oficina', 'telao-outra-fase']) {
     $(id).hidden = id !== secao;
   }
 }
@@ -166,6 +170,40 @@ function desenharResultado(telas, grupos, criterios) {
   }));
 }
 
+// Oficina, votação e fim: os harnesses ao vivo; na votação e no fim, os votos de cada um; no fim, o vencedor
+// (ou os empatados, enquanto o controle não escolhe: Decisão 9).
+function desenharOficina(fase, oficina, votos, alunos, grupos, escolhido) {
+  $('telao-oficina-titulo').textContent = TITULOS_DA_OFICINA[fase];
+  const comVotos = fase !== 'oficina';
+  const harnesses = harnessesDaSala(oficina, grupos);
+  const contagem = contarVotos(votos, alunos, oficina, grupos);
+  const vencedor = harnesses.length ? vencedorDe(contagem, escolhido) : null;
+  const empatados = harnesses.length ? lideres(contagem) : [];
+  const nomes = (gids) => gids.map((g) => grupos[g].nome).join(', ').replace(/, ([^,]*)$/, ' e $1');
+  $('telao-vencedor').hidden = fase !== 'fim';
+  $('telao-vencedor').textContent = !harnesses.length ? 'Nenhum harness foi montado.'
+    : vencedor ? `Vencedor: ${grupos[vencedor].nome}`
+      : `Empate entre ${nomes(empatados)}. O apresentador escolhe o vencedor.`;
+  $('telao-oficina-vazia').hidden = harnesses.length > 0;
+  $('telao-harnesses').replaceChildren(...harnesses.map((gid) => {
+    const li = document.createElement('li');
+    li.dataset.gid = gid;
+    if (fase === 'fim' && (vencedor ? gid === vencedor : empatados.includes(gid))) li.classList.add('lider');
+    const cartao = desenharHarness(oficina[gid], grupos[gid]);
+    if (comVotos) {
+      const p = document.createElement('p');
+      p.className = 'telao-votos';
+      const n = document.createElement('strong');
+      n.className = 'telao-numero';
+      n.textContent = contagem[gid];
+      p.append(n, ` ${plural(contagem[gid], 'voto', 'votos')}`);
+      cartao.insertBefore(p, cartao.children[1]);
+    }
+    li.append(cartao);
+    return li;
+  }));
+}
+
 export async function iniciarTelao() {
   if (!auth) return;
   const sala = (new URLSearchParams(location.search).get('sala') || '').trim().toUpperCase();
@@ -188,7 +226,11 @@ export async function iniciarTelao() {
   let pararCriterios = null;
   let placar = false;
   let resultado = false;
+  let oficina = {};
+  let votos = {};
+  let vencedor = null;
   const redesenhar = () => {
+    if (TITULOS_DA_OFICINA[fase]) desenharOficina(fase, oficina, votos, alunos, grupos, vencedor);
     if (rodada) desenharTelas(telas, grupos, alunos, rodada);
     desenharProntos(telas, grupos, fase);
     if (placar) desenharPlacarR1(telas, grupos, criterios);
@@ -209,6 +251,7 @@ export async function iniciarTelao() {
   onValue(ref(db, `${raiz}/estado`), (s) => {
     const estado = s.val();
     fase = estado?.fase || null;
+    vencedor = estado?.vencedor || null;
     document.body.dataset.fase = estado?.fase || '';
     placar = estado?.fase === 'r1_avaliacao';
     resultado = estado?.fase === 'resultado';
@@ -232,6 +275,10 @@ export async function iniciarTelao() {
       rodada = null;
       redesenhar();
       mostrar('telao-resultado');
+    } else if (TITULOS_DA_OFICINA[estado.fase]) {
+      rodada = null;
+      redesenhar();
+      mostrar('telao-oficina');
     } else {
       rodada = null;
       $('telao-fase').textContent = nomeDaFase(estado.fase);
@@ -241,6 +288,8 @@ export async function iniciarTelao() {
   acompanharCronometro(sala, $('cronometro'));
   onValue(ref(db, `${raiz}/config/frase`), (s) => { $('telao-frase').textContent = s.val() || ''; });
   onValue(ref(db, `${raiz}/telas`), (s) => { telas = s.val() || {}; redesenhar(); });
+  onValue(ref(db, `${raiz}/oficina`), (s) => { oficina = s.val() || {}; redesenhar(); });
+  onValue(ref(db, `${raiz}/votos`), (s) => { votos = s.val() || {}; redesenhar(); });
   onValue(ref(db, `${raiz}/alunos`), (s) => {
     alunos = s.val() || {};
     redesenhar();

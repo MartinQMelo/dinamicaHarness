@@ -12,6 +12,10 @@ import {
 } from './fases.js';
 import { acompanharCronometro, agoraNoServidor } from './cronometro.js';
 import { contarMembros } from './grupos.js';
+import {
+  harnessesDaSala, contarVotos, lideres, vencedorDe, arquivosDoHarness, nomeDoZip,
+} from './harness.js';
+import { criarZip } from './zip.js';
 
 export const FRASE_R1 = 'Monte a tela inicial de um app de caronas para alunos da UnB.';
 export const TAMANHO_GRUPO_PADRAO = 5;
@@ -91,6 +95,50 @@ async function trocarSessaoR2() {
   await update(ref(db, `salas/${sala}`), atualizacaoDeTroca('r2_troca', { grupos, telas }));
 }
 
+// Votação e fim: votos de cada harness; no fim, o vencedor, a escolha num empate (Decisão 9) e o .zip.
+function desenharVotacao(fase, oficina, votos, alunos, grupos, escolhido) {
+  $('acao-votacao').hidden = fase !== 'votacao' && fase !== 'fim';
+  const harnesses = harnessesDaSala(oficina, grupos);
+  const contagem = contarVotos(votos, alunos, oficina, grupos);
+  $('controle-votos').replaceChildren(...harnesses.map((gid) => {
+    const li = document.createElement('li');
+    li.dataset.gid = gid;
+    li.style.setProperty('--cor-grupo', grupos[gid].cor);
+    li.textContent = `${grupos[gid].nome} · ${contagem[gid]} ${contagem[gid] === 1 ? 'voto' : 'votos'}`;
+    return li;
+  }));
+  $('sem-harness').hidden = harnesses.length > 0;
+  const fim = fase === 'fim' && harnesses.length > 0;
+  $('controle-fim').hidden = !fim;
+  if (!fim) return;
+  const vencedor = vencedorDe(contagem, escolhido);
+  const empatados = lideres(contagem);
+  $('controle-vencedor').textContent = vencedor
+    ? `Vencedor: ${grupos[vencedor].nome}`
+    : 'Empate. Escolha o vencedor:';
+  $('controle-empate').replaceChildren(...(empatados.length > 1 ? empatados : []).map((gid) => {
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = gid === vencedor ? '' : 'secundario';
+    botao.textContent = `Escolher ${grupos[gid].nome}`;
+    botao.addEventListener('click', () => executar(() => set(ref(db, `salas/${sala}/estado/vencedor`), gid)));
+    return botao;
+  }));
+  $('botao-baixar-zip').disabled = !vencedor;
+  $('botao-baixar-zip').onclick = () => baixarZip(oficina[vencedor], grupos[vencedor]);
+}
+
+function baixarZip(harness, grupo) {
+  const url = URL.createObjectURL(new Blob([criarZip(arquivosDoHarness(harness, grupo))], { type: 'application/zip' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeDoZip(grupo);
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function desenharGrupos(grupos, alunos) {
   const lista = Object.entries(grupos || {}).sort(([, a], [, b]) => a.ordem - b.ordem);
   $('sem-grupos').hidden = lista.length > 0;
@@ -131,15 +179,16 @@ async function removerAluno(gid, uid, nome) {
   await executar(() => update(ref(db, `salas/${sala}`), {
     [`grupos/${gid}/membros/${uid}`]: null,
     [`alunos/${uid}`]: null,
+    [`votos/${uid}`]: null,
   }));
 }
 
 async function irParaFase(para) {
   if (!para) return;
-  const [grupos, telas, trocas, segredo, config] = (await Promise.all(['grupos', 'telas', 'trocas', 'segredo', 'config']
+  const [grupos, telas, trocas, segredo, config, estado] = (await Promise.all(['grupos', 'telas', 'trocas', 'segredo', 'config', 'estado']
     .map((filho) => get(ref(db, `salas/${sala}/${filho}`))))).map((s) => s.val());
   await update(ref(db, `salas/${sala}`), atualizacaoDeFase(para, {
-    grupos, telas, trocas, segredo, config,
+    grupos, telas, trocas, segredo, config, estado,
   }, serverTimestamp()));
 }
 
@@ -167,17 +216,34 @@ function abrirSala(codigo) {
   let alunos = {};
   let telas = {};
   let trocas = {};
+  let oficina = {};
+  let votos = {};
+  let vencedor = null;
   const desenharTroca = () => desenharTrocaR2(fase, telas, grupos, trocas);
+  const desenharVotos = () => desenharVotacao(fase, oficina, votos, alunos, grupos, vencedor);
   pararSala = [
-    onValue(ref(db, `salas/${codigo}/estado/fase`), (s) => { fase = s.val(); desenharFase(fase); desenharTroca(); }),
+    onValue(ref(db, `salas/${codigo}/estado/fase`), (s) => {
+      fase = s.val();
+      desenharFase(fase);
+      desenharTroca();
+      desenharVotos();
+    }),
+    onValue(ref(db, `salas/${codigo}/estado/vencedor`), (s) => { vencedor = s.val(); desenharVotos(); }),
+    onValue(ref(db, `salas/${codigo}/oficina`), (s) => { oficina = s.val() || {}; desenharVotos(); }),
+    onValue(ref(db, `salas/${codigo}/votos`), (s) => { votos = s.val() || {}; desenharVotos(); }),
     onValue(ref(db, `salas/${codigo}/grupos`), (s) => {
       grupos = s.val() || {};
       desenharGrupos(grupos, alunos);
       desenharTroca();
+      desenharVotos();
     }),
     onValue(ref(db, `salas/${codigo}/telas`), (s) => { telas = s.val() || {}; desenharTroca(); }),
     onValue(ref(db, `salas/${codigo}/trocas`), (s) => { trocas = s.val() || {}; desenharTroca(); }),
-    onValue(ref(db, `salas/${codigo}/alunos`), (s) => { alunos = s.val() || {}; desenharGrupos(grupos, alunos); }),
+    onValue(ref(db, `salas/${codigo}/alunos`), (s) => {
+      alunos = s.val() || {};
+      desenharGrupos(grupos, alunos);
+      desenharVotos();
+    }),
     acompanharCronometro(codigo, $('cronometro')),
   ];
   $('botao-avancar').onclick = () => executar(() => irParaFase(proximaFase(fase)));
