@@ -14,6 +14,27 @@ feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), al
 - Próximo passo:
 -->
 
+### Revisão 2026-11-01 (segunda, independente)
+Segundo revisor (não autor), sem código de feature e sem partir da revisão anterior. Escopo: F01 a F14.
+- Como revisei: ./init.sh (6/6 @fumaca); npm test 55/55 (2,9 min). Li cada spec inteira e casei cada
+  step com o teste que o prova (mesmo mapeamento da revisão abaixo; conferido de novo, não copiado).
+  Extra: testei escolherRevisores (F10, step 1) com 3 a 30 grupos e todo deslocamento de dono
+  (n × n casos): nenhum revisor igual ao autor ou ao dono (o teste só cobre 3 a 6). Derrubei
+  emuladores e servidor (portas 9000, 9099 e 5173 livres) e o ./init.sh subiu tudo e passou no @fumaca.
+  Screenshots com Playwright das 12 fases numa sala com 2 alunos reais e 20 bots: aluno e telão em
+  360x740 e 1920x1080, controle em 1920x1080. Zero erros no console.
+- Resultado: nenhuma feature reprovada. Todo step de F01 a F14 tem teste que prova o que ele diz.
+- Observações (não reprovam; a maioria é assunto da F15):
+  - Telão a 1920x1080 já rola na vertical com só 5 grupos em resultado (1266 px), oficina (1498),
+    votação (1644) e fim (1767). Com 30 grupos fica bem pior. O step 2 da F15 vai ter que cobrir isso.
+  - Telão nas fases r2_declaracao e r3 mostra só "Fase: …" (tela vazia no projetor). Nenhum step pede
+    mais; fica como ideia para a F15 ou para o apresentador decidir.
+  - Aluno a 360x740: nenhuma rolagem horizontal em nenhuma fase (bom sinal para o step 1 da F15).
+  - Repito a observação da F10: `telas` tem leitura para qualquer autenticado, e revisao.js escuta
+    `salas/{sala}/telas` inteira, então os `declarados` do autor chegam ao celular do revisor antes de
+    enviar (só não aparecem na tela). O step fala do que o revisor vê, por isso não reprova.
+- Próximo passo: F15.
+
 ### Revisão 2026-11-01
 Revisor (não autor), sem código de feature. Escopo: F01 a F14 (passes: true). F15 continua false e não foi revisada.
 - Como revisei: li AGENTS.md, a especificação e feature_list.json; rodei ./init.sh (6/6 @fumaca) e npm test
