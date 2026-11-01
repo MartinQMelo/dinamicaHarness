@@ -1,9 +1,9 @@
 # Progresso
 
 ## Estado atual
-F01 a F09 prontas e verificadas (passes: true). Próximo passo: feature F10 (rodada 3 de revisão e
-resultado). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), site/js/criterios.js
-(mediaDeCriterios serve para declarados e revisao/aprovados) e site/js/cartoes.js.
+F01 a F10 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
+feature_list.json (oficina). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
+(uma seção por fase) e telao.js (uma seção por fase).
 
 ## Sessões
 <!-- Uma entrada por sessão, mais recente no topo:
@@ -13,6 +13,42 @@ resultado). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), site/js/c
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-31 · Feature F10
+- Feito: fases.js › escolherRevisores(grupos, telas): para as telas da R2 com dono num grupo, tenta um
+  deslocamento k na ordem dos grupos a partir do dono (cada grupo revisa uma tela só) até que nenhum
+  revisor seja autor nem dono; senão escolhe tela a tela (≠ autor e ≠ dono; senão ≠ dono; senão o
+  dono). atualizacaoDeFase('r3') grava telas/{tid}/revisao/revisor só nas telas que ainda não têm
+  (dono não muda: Decisão 5; voltar e avançar não troca o revisor). criterios.js: marcasDe(tela,
+  'revisao/aprovados') usado por mediaDeCriterios, e vitoriasFalsas(tela) = declarado pronto e não
+  aprovado. Celular: site/js/revisao.js e a seção tela-revisao na r3: a tela revisada, cada critério
+  com Aprova/Reprova (grava revisao/aprovados/{c} na hora, o grupo inteiro vê), "N de 5 critérios
+  avaliados", "Enviar revisão" só com todos decididos (grava enviadoEm). Depois de enviar: "O agente
+  disse: pronto/não pronto", selo "Vitória falsa" e o total; as opções ficam travadas. Telão: seção
+  telao-resultado na fase resultado: R1 (média avaliacaoR1), R2 declarado pronto e aprovado pelo
+  revisor (médias), faixa vermelha "Vitória falsa: N critérios declarados prontos e reprovados pelo
+  revisor" e cada tela da R2 com declarado/aprovado e suas vitórias falsas. Regras: revisao/aprovados/
+  {c1..c5} booleano, só do grupo revisor, rodada 2, só na r3, antes de enviar; enviadoEm = now, uma
+  vez, só do revisor na r3 e só com todos os critérios de config/criterios decididos; revisor e dono
+  continuam só do apresentador.
+- Como verifiquei: npm test 45/45 (3 novos em tests/f10-revisao.spec.js): escolherRevisores com 3 a 6
+  grupos, com e sem troca (revisor ≠ autor, ≠ dono, todos diferentes), 2 e 1 grupo, telas da R1 e de
+  grupo apagado fora; pelo controle com 3 grupos (g1→g3, g2→g1, g3→g2, donos iguais), voltar/avançar
+  mantém revisão começada. 3 celulares: revisor vê a tela e os 5 critérios sem nenhum texto das
+  marcações do autor (nem escondido), marca/muda de ideia, regras (enviar incompleta, tela de outro
+  revisor, tela em mãos, c9, não booleano, mudar revisor/dono, mudar depois de enviar, enviar de
+  novo, revisar fora da r3 → negado), envio mostra declarados e 2 vitórias falsas, também depois de
+  recarregar; telão no resultado com as médias e a contagem. Teste do resultado com dados semeados:
+  médias, singular/plural, atualização ao vivo, fundo vermelho do destaque, números ≥ 32 px, voltar
+  esconde. Conferi que os testes falham com as regras da revisão abertas e sem a escolha de revisor
+  na r3; o teste pegou um vazamento (o texto das vitórias falsas ficava no DOM escondido antes de
+  enviar), corrigido. Repeti o arquivo 2 vezes sem falha; conferi por screenshot (360 px e 1920).
+- Problemas / decisões: telas/ é legível por qualquer autenticado, então "não vê as marcações do autor"
+  é garantido pela página, não pelas regras (esconder declarados exigiria reestruturar a leitura de
+  telas inteira). Com 2 grupos o revisor é diferente do dono (acaba sendo o autor). As escolhas do
+  revisor vão para o banco antes de enviar (estado só no banco); só enviadoEm as congela. Na r3 o
+  telão continua mostrando "Fase: Rodada 3 · revisão" (sem contagem de revisões enviadas: fora da F10).
+- Próximo passo: próxima feature de feature_list.json.
 
 ### 2026-10-31 · Feature F09
 - Feito: fases.js: RODADA_DA_TROCA inclui r2_troca (para "voltar" desfazer); TROCA_AO_ENTRAR = só

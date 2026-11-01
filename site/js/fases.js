@@ -90,12 +90,29 @@ export function atualizacaoDeDesfazerTroca(fase, { telas, trocas } = {}) {
   return updates;
 }
 
+// Revisores da r3: para cada tela da rodada 2 com dono num grupo, um grupo diferente do autor e do dono
+// atual (quando houver 3 ou mais grupos). Tenta um deslocamento k na ordem dos grupos a partir do dono:
+// como os donos são todos diferentes, cada grupo revisa uma tela só. Se nenhum k serve para todas, escolhe
+// tela a tela: diferente do autor e do dono; senão, diferente do dono; senão, o próprio dono.
+export function escolherRevisores(grupos, telas) {
+  const gids = Object.keys(grupos || {}).sort((a, b) => grupos[a].ordem - grupos[b].ordem);
+  const lista = Object.entries(telas || {}).filter(([, t]) => t.rodada === 2 && grupos?.[t.dono]);
+  const serve = (t, g) => g !== t.autor && g !== t.dono;
+  for (let k = 1; k < gids.length; k++) {
+    const escolha = lista.map(([tid, t]) => [tid, gids[(gids.indexOf(t.dono) + k) % gids.length]]);
+    if (escolha.every(([tid, g]) => serve(telas[tid], g))) return Object.fromEntries(escolha);
+  }
+  return Object.fromEntries(lista.map(([tid, t]) => [tid,
+    gids.find((g) => serve(t, g)) || gids.find((g) => g !== t.dono) || t.dono]));
+}
+
 // Atualização multi-caminho (relativa a salas/{sala}) para ir à fase `para`. Mudar de fase zera o
 // cronômetro. Ao entrar na r1 ou na r2, cria a tela em branco dos grupos que ainda não têm a sua da
 // rodada (voltar e avançar de novo não apaga o que já foi feito) e apaga os `saiu` das telas da rodada
 // (voltar da r2_troca deixa os grupos saírem de novo). Entrar na r1_troca troca as sessões, se a
 // troca ainda não foi feita (voltar da fase seguinte não troca de novo); voltar para a fase de antes
-// de uma troca a desfaz. Da r1_avaliacao em diante, config/criterios é a cópia de segredo/criterios; antes
+// de uma troca a desfaz. Entrar na r3 escolhe o revisor das telas da rodada 2 que ainda não têm um (o
+// dono não muda: Decisão 5; voltar e avançar não troca o revisor). Da r1_avaliacao em diante, config/criterios é a cópia de segredo/criterios; antes
 // dela, é apagado se existir (os alunos não podem ler os critérios antes da hora).
 export function atualizacaoDeFase(para, {
   grupos, telas, trocas, segredo, config,
@@ -110,6 +127,12 @@ export function atualizacaoDeFase(para, {
     }
     for (const [tid, tela] of Object.entries(telas || {})) {
       if (tela.rodada === rodadaNova && tela.saiu) updates[`telas/${tid}/saiu`] = null;
+    }
+  }
+  if (para === 'r3') {
+    const semRevisor = Object.fromEntries(Object.entries(telas || {}).filter(([, t]) => !t.revisao?.revisor));
+    for (const [tid, revisor] of Object.entries(escolherRevisores(grupos, semRevisor))) {
+      updates[`telas/${tid}/revisao/revisor`] = revisor;
     }
   }
   if (TROCA_AO_ENTRAR.includes(para) && !trocas?.[para]) Object.assign(updates, atualizacaoDeTroca(para, { grupos, telas }));

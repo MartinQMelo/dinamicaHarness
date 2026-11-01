@@ -96,6 +96,18 @@
               "$outro": {
                 ".validate": false
               }
+            },
+            "revisao": {
+              "aprovados": {
+                "$c": {
+                  ".write": "auth != null && data.parent().parent().child('revisor').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().parent().child('revisor').val() && data.parent().parent().parent().child('rodada').val() === 2 && root.child('salas').child($sala).child('estado/fase').val() === 'r3' && !data.parent().parent().child('enviadoEm').exists()",
+                  ".validate": "$c.matches(/^c[1-5]$/) && newData.isBoolean()"
+                }
+              },
+              "enviadoEm": {
+                ".write": "auth != null && data.parent().child('revisor').exists() && root.child('salas').child($sala).child('alunos').child(auth.uid).child('grupo').val() === data.parent().child('revisor').val() && data.parent().parent().child('rodada').val() === 2 && root.child('salas').child($sala).child('estado/fase').val() === 'r3' && !data.exists() && (!root.child('salas').child($sala).child('config/criterios/c1').exists() || data.parent().child('aprovados/c1').isBoolean()) && (!root.child('salas').child($sala).child('config/criterios/c2').exists() || data.parent().child('aprovados/c2').isBoolean()) && (!root.child('salas').child($sala).child('config/criterios/c3').exists() || data.parent().child('aprovados/c3').isBoolean()) && (!root.child('salas').child($sala).child('config/criterios/c4').exists() || data.parent().child('aprovados/c4').isBoolean()) && (!root.child('salas').child($sala).child('config/criterios/c5').exists() || data.parent().child('aprovados/c5').isBoolean())",
+                ".validate": "newData.val() === now"
+              }
             }
           }
         },

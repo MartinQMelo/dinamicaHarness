@@ -8,6 +8,7 @@ import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
 import { criarEditor } from './editor.js';
 import { criarAvaliacao } from './avaliacao.js';
 import { criarCartoes } from './cartoes.js';
+import { criarRevisao } from './revisao.js';
 import { nomeDaFase } from './fases.js';
 import { acompanharCronometro } from './cronometro.js';
 
@@ -20,7 +21,7 @@ const FASES_DOS_CARTOES = ['r2', 'r2_troca', 'r2_declaracao'];
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao', 'tela-declaracao']) {
+  for (const id of ['tela-sem-sala', 'tela-entrada', 'tela-grupo', 'tela-editor', 'tela-avaliacao', 'tela-declaracao', 'tela-revisao']) {
     $(id).hidden = id !== secao;
   }
 }
@@ -71,6 +72,7 @@ function acompanharGrupo(sala, uid, gid) {
     $('editor-grupo').textContent = grupo.nome;
     $('avaliacao-grupo').textContent = grupo.nome;
     $('declaracao-grupo').textContent = grupo.nome;
+    $('revisao-grupo').textContent = grupo.nome;
     $('cartao-grupo').style.background = grupo.cor;
     document.documentElement.style.setProperty('--cor-grupo', grupo.cor);
     const colegas = Object.keys(grupo.membros || {}).filter((m) => m !== uid);
@@ -87,11 +89,12 @@ function acompanharGrupo(sala, uid, gid) {
 }
 
 // A fase decide o que o celular mostra: espera no grupo, o editor da tela (com os cartões na
-// rodada 2), a avaliação da R1 ou a declaração da R2.
+// rodada 2), a avaliação da R1, a declaração da R2 ou a revisão da r3.
 function acompanharFase(sala, uid, gid) {
   let editor = null;
   const avaliacao = criarAvaliacao(sala, gid);
   const cartoes = criarCartoes(sala, uid, gid);
+  const revisao = criarRevisao(sala, gid);
   let fase;
   let trocaR2 = false; // na r2_troca, a troca só acontece quando o controle aperta o botão
   let sessaoAnterior;
@@ -109,7 +112,9 @@ function acompanharFase(sala, uid, gid) {
     sessaoAnterior = sessao;
     if (fase === 'r1_avaliacao') avaliacao.mostrar(); else avaliacao.esconder();
     if (FASES_DOS_CARTOES.includes(fase)) cartoes.mostrar(fase, trocaR2); else cartoes.esconder();
+    if (fase === 'r3') revisao.mostrar(); else revisao.esconder();
     if (fase === 'r1_avaliacao') { mostrar('tela-avaliacao'); return; }
+    if (fase === 'r3') { mostrar('tela-revisao'); return; }
     if (fase === 'r2_declaracao') { mostrar('tela-declaracao'); return; }
     const rodada = RODADA_DE_EDICAO[fase];
     if (!rodada) { mostrar('tela-grupo'); return; }

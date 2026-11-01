@@ -121,6 +121,22 @@
       </div>
     </section>
 
+    <section id="tela-revisao" class="avaliacao" hidden>
+      <p class="faixa-grupo">Grupo <strong id="revisao-grupo"></strong></p>
+      <h2>Revisão</h2>
+      <p>Vocês revisam a tela de outro agente. Olhem só a tela e aprovem ou reprovem cada critério.</p>
+      <p id="revisao-aguardando">Aguardando uma tela para revisar…</p>
+      <div id="revisao-area" hidden>
+        <ul id="revisao-criterios" class="lista-criterios lista-revisao"></ul>
+        <p id="revisao-total" class="avaliacao-total"></p>
+        <button id="botao-enviar-revisao" type="button" class="botao-largo">Enviar revisão</button>
+        <p id="revisao-falsas" class="revisao-falsas" hidden></p>
+        <p id="erro-revisao" class="erro" role="alert"></p>
+        <h3>A tela revisada</h3>
+        <div id="revisao-moldura"></div>
+      </div>
+    </section>
+
     <section id="tela-avaliacao" class="avaliacao" hidden>
       <p class="faixa-grupo">Grupo <strong id="avaliacao-grupo"></strong></p>
       <h2>Os critérios eram estes</h2>

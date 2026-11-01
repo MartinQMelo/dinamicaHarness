@@ -107,7 +107,7 @@
         "O revisor aprova ou reprova cada critério sem ver as marcações do autor antes de enviar",
         "Na fase resultado, o telão mostra R1 vs R2 e, na R2, 'declarado pronto' vs 'aprovado pelo revisor', destacando a diferença como 'vitória falsa'"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F11",

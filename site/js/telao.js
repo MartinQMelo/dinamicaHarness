@@ -7,7 +7,7 @@ import { contarMembros } from './grupos.js';
 import { desenharTela } from './tela.js';
 import { nomeDaFase, contarProntos } from './fases.js';
 import {
-  listaDeCriterios, contarMarcados, mediaDeCriterios, formatarMedia,
+  listaDeCriterios, contarMarcados, mediaDeCriterios, formatarMedia, vitoriasFalsas,
 } from './criterios.js';
 import { acompanharCronometro } from './cronometro.js';
 
@@ -18,7 +18,7 @@ const RODADA_DE_EDICAO = {
 const $ = (id) => document.getElementById(id);
 
 function mostrar(secao) {
-  for (const id of ['telao-sem-sala', 'telao-lobby', 'telao-rodada', 'telao-avaliacao', 'telao-outra-fase']) {
+  for (const id of ['telao-sem-sala', 'telao-lobby', 'telao-rodada', 'telao-avaliacao', 'telao-resultado', 'telao-outra-fase']) {
     $(id).hidden = id !== secao;
   }
 }
@@ -129,6 +129,43 @@ function desenharPlacarR1(telas, grupos, criterios) {
   }));
 }
 
+// Resultado: placar da R1 contra a R2 e, na R2, "declarado pronto" contra "aprovado pelo revisor". A
+// diferença (critério declarado pronto e não aprovado) é a vitória falsa, em destaque.
+function desenharResultado(telas, grupos, criterios) {
+  const total = listaDeCriterios(criterios).length || 5;
+  for (const e of document.querySelectorAll('.resultado-total')) e.textContent = total;
+  $('resultado-r1').textContent = formatarMedia(mediaDeCriterios(telas, grupos, 1, 'avaliacaoR1'));
+  $('resultado-r2-declarados').textContent = formatarMedia(mediaDeCriterios(telas, grupos, 2, 'declarados'));
+  $('resultado-r2-aprovados').textContent = formatarMedia(mediaDeCriterios(telas, grupos, 2, 'revisao/aprovados'));
+  const lista = Object.entries(telas || {})
+    .filter(([, t]) => t.rodada === 2 && grupos?.[t.dono])
+    .sort(([, a], [, b]) => grupos[a.autor]?.ordem - grupos[b.autor]?.ordem);
+  const falsas = lista.reduce((soma, [, t]) => soma + vitoriasFalsas(t).length, 0);
+  $('resultado-falsas-n').textContent = falsas;
+  $('resultado-falsas-rotulo').textContent = falsas === 1
+    ? 'critério declarado pronto e reprovado pelo revisor'
+    : 'critérios declarados prontos e reprovados pelo revisor';
+  $('resultado-telas').replaceChildren(...lista.map(([tid, t]) => {
+    const li = document.createElement('li');
+    li.dataset.tid = tid;
+    li.style.setProperty('--cor-grupo', grupos[t.autor]?.cor || grupos[t.dono].cor);
+    const nome = document.createElement('p');
+    nome.className = 'telao-grupo-nome';
+    nome.textContent = `Tela de ${grupos[t.autor]?.nome || t.autor}`;
+    const numeros = document.createElement('p');
+    const n = vitoriasFalsas(t).length;
+    numeros.textContent = `declarado pronto ${contarMarcados(t.declarados)}/${total} · aprovado ${contarMarcados(t.revisao?.aprovados)}/${total}`;
+    if (n) {
+      const falsa = document.createElement('strong');
+      falsa.className = 'telao-falsa';
+      falsa.textContent = ` · ${n} ${n === 1 ? 'vitória falsa' : 'vitórias falsas'}`;
+      numeros.append(falsa);
+    }
+    li.append(nome, numeros);
+    return li;
+  }));
+}
+
 export async function iniciarTelao() {
   if (!auth) return;
   const sala = (new URLSearchParams(location.search).get('sala') || '').trim().toUpperCase();
@@ -150,12 +187,14 @@ export async function iniciarTelao() {
   let criterios = null;
   let pararCriterios = null;
   let placar = false;
+  let resultado = false;
   const redesenhar = () => {
     if (rodada) desenharTelas(telas, grupos, alunos, rodada);
     desenharProntos(telas, grupos, fase);
     if (placar) desenharPlacarR1(telas, grupos, criterios);
+    if (resultado) desenharResultado(telas, grupos, criterios);
   };
-  // config/criterios só pode ser lido da r1_avaliacao em diante: escuta só enquanto mostra o placar.
+  // config/criterios só pode ser lido da r1_avaliacao em diante: escuta só enquanto mostra um placar.
   const escutarCriterios = (ligar) => {
     if (ligar && !pararCriterios) {
       pararCriterios = onValue(ref(db, `${raiz}/config/criterios`), (s) => { criterios = s.val(); redesenhar(); },
@@ -172,7 +211,8 @@ export async function iniciarTelao() {
     fase = estado?.fase || null;
     document.body.dataset.fase = estado?.fase || '';
     placar = estado?.fase === 'r1_avaliacao';
-    escutarCriterios(placar);
+    resultado = estado?.fase === 'resultado';
+    escutarCriterios(placar || resultado);
     if (!estado) {
       $('mensagem-telao-sem-sala').textContent = `A sala ${sala} não existe.`;
       mostrar('telao-sem-sala');
@@ -188,6 +228,10 @@ export async function iniciarTelao() {
       rodada = null;
       redesenhar();
       mostrar('telao-avaliacao');
+    } else if (resultado) {
+      rodada = null;
+      redesenhar();
+      mostrar('telao-resultado');
     } else {
       rodada = null;
       $('telao-fase').textContent = nomeDaFase(estado.fase);
