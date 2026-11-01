@@ -1,7 +1,7 @@
 # Progresso
 
 ## Estado atual
-F01 a F14 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
+F01 a F15 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
 feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
@@ -47,6 +47,32 @@ Observações (não reprovam nenhuma feature, porque nenhum step aprovado as ped
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-11-01 · Feature F15
+- Feito: site/js/caber.js: no telão (online), a seção à vista sempre cabe em 1920x1080 sem rolagem; se
+  não couber, o conteúdo ganha CSS zoom (busca binária, mínimo 0,3), mas o título da fase e as frases
+  (h2, .telao-frase, .telao-instrucao) nunca encolhem. Roda a cada redesenho e no resize. O telão
+  offline não usa (é interativo, o apresentador edita nele). Na r2_declaracao e na r3 o telão deixou de
+  mostrar só "Fase: …": mostra as telas da rodada 2 com o nome da fase e uma instrução
+  (#telao-instrucao). Lista de grupos (lobby, placar R1) e lista de telas do resultado em várias
+  colunas. Acessibilidade: "Tela vazia" com contraste 6,4:1 (era 3,0) e o nome acessível de cada
+  componente no editor começa pelo texto visível ("Caronas UnB, editar Título").
+- Como verifiquei: npm test 58/58 (3 novos em tests/f15-acabamento.spec.js). (1) Partida inteira com
+  20 bots e uma aluna real (sozinha no 5º grupo, nome comprido, título de 82 letras sem espaço): nas 12
+  fases, celular 360x740 sem rolagem lateral; telão 1920x1080 sem rolagem nenhuma, título da fase ≥ 32
+  px e números ≥ 32 px na tela; r2_declaracao e r3 com as 5 telas e a instrução. (2) Sala semeada com
+  12 grupos e telas de 8 componentes com texto longo: lobby, r2, r2_declaracao, r3 e resultado cabem,
+  com título e números ≥ 32 px. (3) Lighthouse 13 (acessibilidade) no Chromium do Playwright pela porta
+  de depuração, contexto persistente para a aluna continuar logada: entrada, editor da r1, cartões da
+  r2 e votação, todos 100 (mínimo exigido 90). Conferi as fotos de cada fase (FOTOS=pasta npx
+  playwright test tests/f15-acabamento.spec.js); ficaram fora do repositório.
+- Problemas / decisões: lighthouse entrou como devDependency. Com muitos grupos o zoom deixa as telas
+  dos celulares pequenas no projetor (12 grupos: texto dos componentes ~10 px), mas tudo fica à vista;
+  o título e os números do placar continuam grandes. Achado de passagem, não mexi: no editor, o
+  componente recém-adicionado não fica selecionado (selecionar() roda antes de ele existir no banco e
+  desenhar() limpa a seleção); os testes clicam nele antes de escrever. LH_DETALHE=1 mostra no teste
+  os elementos que falham no Lighthouse.
+- Próximo passo: a próxima feature com passes false (se houver).
 
 ### Revisão 2026-11-01 (segunda, independente)
 Segundo revisor (não autor), sem código de feature e sem partir da revisão anterior. Escopo: F01 a F14.
@@ -550,3 +576,4 @@ Revisor (não autor), sem código de feature. Escopo: F01 a F14 (passes: true). 
 - Faixa "Sem conexão. Reconectando…" no celular quando data-conectado="nao" (hoje a queda não aparece para o aluno).
 - Service worker para o telao.html?offline=1 abrir mesmo sem rede (hoje precisa já estar aberto, ou o site servido localmente).
 - Modo offline: editar critérios e frase, cronômetro local e os cartões da R2 (progress.md, saída da sessão).
+- Editor: selecionar automaticamente o componente recém-adicionado (hoje a seleção se perde até ele chegar do banco).

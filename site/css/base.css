@@ -115,7 +115,7 @@ h2 { font-size: 1.1rem; margin: 20px 0 8px; }
 .telao-placar { flex: 1; min-width: 300px; }
 .telao-contagem { margin: 0 0 16px; }
 
-.telao-grupos { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; }
+.telao-grupos { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 .telao-grupos li {
   display: flex;
   justify-content: space-between;
@@ -219,7 +219,7 @@ textarea {
   overflow-wrap: anywhere;
 }
 
-.moldura-vazia { color: #8c959f; text-align: center; margin: auto 0; }
+.moldura-vazia { color: #57606a; text-align: center; margin: auto 0; }
 
 .comp {
   position: relative;
@@ -389,7 +389,7 @@ body.telao main { position: relative; }
 .telao-resultado-numeros p { margin: 0; }
 .telao-falsa { color: #ff8182; }
 .telao-falsa-destaque { margin: 16px 0 0; padding: 16px 24px; border-radius: 12px; background: #cf222e; color: #fff; font-weight: 800; }
-.telao-resultado-telas { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; }
+.telao-resultado-telas { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
 .telao-resultado-telas li { padding: 12px 24px; border-radius: 12px; border-left: 12px solid var(--cor-grupo); background: rgba(255, 255, 255, 0.08); }
 .telao-resultado-telas p { margin: 0; }
 
@@ -459,3 +459,4 @@ body.telao textarea, body.telao select { font: inherit; font-size: 1rem; }
 .offline-campo { display: block; margin: 0 0 8px; font-size: 1rem; }
 .offline-campo input, .offline-campo textarea, .offline-campo select { display: block; width: 100%; }
 .offline-feature { padding: 8px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.15); }
+.telao-instrucao { font-size: 2rem; margin: 0 0 24px; }

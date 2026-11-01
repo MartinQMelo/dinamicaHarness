@@ -10,6 +10,14 @@ import {
   RODADA_DE_EDICAO, TITULOS_DA_OFICINA, $, mostrar, plural, secaoDaFase, desenharGrupos, desenharTelas,
   desenharProntos, desenharPlacarR1, desenharResultado, desenharOficina,
 } from './telao-desenho.js';
+import { caberNaTela, ajustarSempre } from './caber.js';
+
+// Na declaração e na revisão, o projetor mostra as telas da rodada 2 com o que os grupos fazem agora.
+const RODADA_NO_TELAO = { ...RODADA_DE_EDICAO, r2_declaracao: 2, r3: 2 };
+const INSTRUCOES = {
+  r2_declaracao: 'Cada grupo marca no celular o que a tela em mãos já cumpre.',
+  r3: 'Cada grupo revisa a tela de outro grupo e aprova só o que está pronto de verdade.',
+};
 
 function esperarUsuario() {
   return new Promise((resolve) => {
@@ -70,6 +78,7 @@ export async function iniciarTelao() {
     desenharProntos(telas, grupos, fase);
     if (placar) desenharPlacarR1(telas, grupos, criterios);
     if (resultado) desenharResultado(telas, grupos, criterios);
+    caberNaTela();
   };
   // config/criterios só pode ser lido da r1_avaliacao em diante: escuta só enquanto mostra um placar.
   const escutarCriterios = (ligar) => {
@@ -91,17 +100,21 @@ export async function iniciarTelao() {
     placar = estado?.fase === 'r1_avaliacao';
     resultado = estado?.fase === 'resultado';
     escutarCriterios(placar || resultado);
-    rodada = RODADA_DE_EDICAO[estado?.fase] || null;
+    rodada = RODADA_NO_TELAO[estado?.fase] || null;
     if (!estado) {
       $('mensagem-telao-sem-sala').textContent = `A sala ${sala} não existe.`;
       mostrar('telao-sem-sala');
       return;
     }
-    if (rodada) $('telao-rodada-titulo').textContent = `Rodada ${rodada}`;
+    if (rodada) $('telao-rodada-titulo').textContent = RODADA_DE_EDICAO[fase] ? `Rodada ${rodada}` : nomeDaFase(fase);
+    $('telao-instrucao').textContent = INSTRUCOES[fase] || '';
+    $('telao-instrucao').hidden = !INSTRUCOES[fase];
     $('telao-fase').textContent = nomeDaFase(estado.fase);
     redesenhar();
-    mostrar(secaoDaFase(estado.fase));
+    mostrar(rodada ? 'telao-rodada' : secaoDaFase(estado.fase));
+    caberNaTela();
   });
+  ajustarSempre();
   acompanharCronometro(sala, $('cronometro'));
   onValue(ref(db, `${raiz}/config/frase`), (s) => { $('telao-frase').textContent = s.val() || ''; });
   onValue(ref(db, `${raiz}/telas`), (s) => { telas = s.val() || {}; redesenhar(); });

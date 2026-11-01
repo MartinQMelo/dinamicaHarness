@@ -157,7 +157,7 @@
         "Teste e2e com viewport de 1920x1080 no telão em todas as fases",
         "Lighthouse de acessibilidade do index.html com nota mínima 90"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

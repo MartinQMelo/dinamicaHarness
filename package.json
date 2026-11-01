@@ -12,6 +12,7 @@
     "@playwright/test": "^1.48.0",
     "firebase-tools": "^13.0.0",
     "http-server": "^14.1.1",
-    "jsqr": "^1.4.0"
+    "jsqr": "^1.4.0",
+    "lighthouse": "^13.6.0"
   }
 }

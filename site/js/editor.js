@@ -65,7 +65,8 @@ export function criarEditor(sala, uid) {
     for (const c of moldura.querySelectorAll('.comp')) {
       c.tabIndex = 0;
       c.setAttribute('role', 'button');
-      c.setAttribute('aria-label', `Editar ${infoDoTipo(c.dataset.tipo)?.nome || c.dataset.tipo}`);
+      // O nome acessível começa pelo texto visível (quem usa comando de voz fala o que vê).
+      c.setAttribute('aria-label', `${c.textContent.trim()}, editar ${infoDoTipo(c.dataset.tipo)?.nome || c.dataset.tipo}`);
       c.classList.toggle('selecionado', c.dataset.id === selecionado);
     }
     $('editor-moldura').replaceChildren(moldura);
