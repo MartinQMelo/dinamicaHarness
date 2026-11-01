@@ -423,3 +423,39 @@ body.telao .harness-grupo { color: #fff; background: var(--cor-grupo); display: 
 .telao-votos { font-size: 1.75rem; }
 .telao-harnesses li.lider .harness { outline: 6px solid #f0c000; }
 .telao-vencedor { margin: 0 0 24px; padding: 16px 24px; border-radius: 12px; background: #f0c000; color: #1b1e24; font-size: 3rem; font-weight: 800; }
+
+/* Telão offline (plano B): o apresentador faz tudo pela tela */
+.offline-controle {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin: -24px 0 24px; padding: 12px 16px; border-radius: 12px; background: #21262d; font-size: 1.25rem;
+}
+.offline-selo { padding: 2px 12px; border-radius: 8px; background: #d4a72c; color: #1b1e24; font-weight: 800; }
+.offline-fase { flex: 1; }
+body.offline .telao-grupos strong { display: none; }
+body.offline .telao-cronometro { top: 96px; }
+.offline-painel { margin: 32px 0 0; font-size: 1.25rem; }
+.offline-painel h2 { font-size: 1.75rem; }
+.offline-painel button { margin: 0 8px 8px 0; }
+body.telao textarea, body.telao select { font: inherit; font-size: 1rem; }
+.offline-editor { margin-top: 12px; font-size: 1rem; }
+.offline-adicionar { display: flex; gap: 8px; margin-bottom: 8px; }
+.offline-adicionar select { flex: 1; }
+.offline-componentes { margin: 0; padding-left: 1.5em; display: grid; gap: 6px; }
+.offline-componente { display: flex; gap: 4px; align-items: flex-start; }
+.offline-componente textarea { flex: 1; min-width: 0; }
+.offline-componente button { padding: 4px 10px; }
+.offline-marcacao-telas, .offline-votos { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
+.offline-marcacao-tela, .offline-votos li { padding: 12px 24px; border-radius: 12px; border-left: 12px solid var(--cor-grupo); background: rgba(255, 255, 255, 0.08); }
+.offline-marcacao-tela .telao-grupo-nome { margin: 0 0 8px; font-weight: 700; }
+.offline-marcacao-corpo { display: flex; gap: 24px; align-items: flex-start; }
+.offline-marcacao-corpo .moldura { flex: 0 0 260px; margin: 0; }
+.offline-marcacao-corpo > div { flex: 1; }
+.offline-criterio { display: block; margin: 0 0 8px; }
+.offline-criterio input { width: 1.4em; height: 1.4em; vertical-align: middle; }
+.offline-oficina-grupos { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
+.offline-oficina-grupo { border: 0; border-top: 8px solid var(--cor-grupo); border-radius: 12px; background: rgba(255, 255, 255, 0.06); padding: 12px 16px; }
+.offline-oficina-grupo legend { font-weight: 800; }
+.offline-campo { display: block; margin: 0 0 8px; font-size: 1rem; }
+.offline-campo input, .offline-campo textarea, .offline-campo select { display: block; width: 100%; }
+.offline-feature { padding: 8px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.15); }

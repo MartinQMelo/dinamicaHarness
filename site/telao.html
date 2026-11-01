@@ -9,6 +9,13 @@
 </head>
 <body class="telao">
   <main>
+    <nav id="offline-controle" class="offline-controle" aria-label="Controle do modo offline" hidden>
+      <span class="offline-selo">Modo offline</span>
+      <strong id="offline-fase" class="offline-fase"></strong>
+      <button id="offline-voltar" type="button" class="secundario">◀ Voltar fase</button>
+      <button id="offline-avancar" type="button">Avançar fase ▶</button>
+      <button id="offline-reiniciar" type="button" class="secundario">Reiniciar</button>
+    </nav>
     <h1>Você é o agente</h1>
     <p id="cronometro" class="cronometro telao-cronometro" hidden></p>
 
@@ -90,12 +97,46 @@
     <section id="telao-outra-fase" hidden>
       <p>Fase: <strong id="telao-fase"></strong></p>
     </section>
+
+    <!-- Só no modo offline (telao.html?offline=1): o apresentador faz pela tela o que os celulares fariam. -->
+    <section id="offline-lobby" class="offline-painel" hidden>
+      <p>Sem internet, os alunos não entram pelo celular: crie os grupos aqui e monte as telas de viva voz.</p>
+      <button id="offline-novo-grupo" type="button">Adicionar grupo</button>
+      <button id="offline-remover-grupo" type="button" class="secundario">Remover último grupo</button>
+    </section>
+    <section id="offline-troca" class="offline-painel" hidden>
+      <button id="offline-trocar-r2" type="button">Trocar sessão</button>
+      <p id="offline-troca-feita" hidden>Troca feita. Voltar para a Rodada 2 desfaz a troca.</p>
+    </section>
+    <section id="offline-marcacao" class="offline-painel" hidden>
+      <h2 id="offline-marcacao-titulo"></h2>
+      <ul id="offline-marcacao-telas" class="offline-marcacao-telas"></ul>
+    </section>
+    <section id="offline-oficina" class="offline-painel" hidden>
+      <h2>Harness de cada grupo</h2>
+      <div id="offline-oficina-grupos" class="offline-oficina-grupos"></div>
+    </section>
+    <section id="offline-votacao" class="offline-painel" hidden>
+      <h2>Votos (contados de mão levantada)</h2>
+      <ul id="offline-votos" class="offline-votos"></ul>
+    </section>
+    <section id="offline-fim" class="offline-painel" hidden>
+      <div id="offline-empate"></div>
+      <button id="offline-baixar-zip" type="button">Baixar harness vencedor (.zip)</button>
+    </section>
   </main>
   <script type="module">
-    import { acompanharConexao } from './js/conexao.js';
-    import { iniciarTelao } from './js/telao.js';
-    acompanharConexao();
-    iniciarTelao();
+    // O modo offline não carrega nada da internet (nem o Firebase): por isso os imports são dinâmicos.
+    if (new URLSearchParams(location.search).get('offline') === '1') {
+      const { iniciarTelaoOffline } = await import('./js/telao-offline.js');
+      iniciarTelaoOffline();
+    } else {
+      const [{ acompanharConexao }, { iniciarTelao }] = await Promise.all([
+        import('./js/conexao.js'), import('./js/telao.js'),
+      ]);
+      acompanharConexao();
+      iniciarTelao();
+    }
   </script>
 </body>
 </html>

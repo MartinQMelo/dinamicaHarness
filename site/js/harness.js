@@ -1,5 +1,6 @@
 // Oficina "Monte seu harness" e votação: projetos, limites, contagem de votos, vencedor e os arquivos do
 // .zip. Sem Firebase, para os testes importarem. As regras do banco usam as mesmas chaves e limites.
+import { criarZip } from './zip.js';
 
 export const PROJETOS = {
   ru: 'Cardápio do RU',
@@ -90,6 +91,18 @@ export function nomeDoZip(grupo) {
   const base = (grupo?.nome || 'grupo').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   return `harness-${base}.zip`;
+}
+
+// Baixa o .zip do harness no navegador (controle online e telão offline).
+export function baixarHarness(harness, grupo) {
+  const url = URL.createObjectURL(new Blob([criarZip(arquivosDoHarness(harness, grupo))], { type: 'application/zip' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeDoZip(grupo);
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function el(tag, classe, texto) {

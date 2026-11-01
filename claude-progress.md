@@ -1,7 +1,7 @@
 # Progresso
 
 ## Estado atual
-F01 a F13 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
+F01 a F14 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
 feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
@@ -13,6 +13,36 @@ feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), al
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-11-01 · Feature F14
+- Feito: telao.html?offline=1 carrega site/js/telao-offline.js por import dinâmico (o modo online
+  continua carregando conexao.js e telao.js), então o modo offline não pede nada à internet: nem o SDK do
+  Firebase, nem o QR da CDN. Os desenhos do telão saíram de telao.js para site/js/telao-desenho.js (sem
+  Firebase; desenharOficina agora recebe a contagem de votos pronta; secaoDaFase escolhe a seção) e são
+  os mesmos nos dois modos. site/js/padroes.js: frase, tamanho do grupo e critérios padrão (o controle
+  reexporta). harness.js › baixarHarness (o .zip, usado pelo controle e pelo offline). site/js/
+  estado-local.js: salaInicial, aplicarAtualizacao (multi-caminho como o update() do Firebase: null
+  apaga, objeto vazio some), criar/remover grupo. O estado fica em localStorage "dinamica-offline", no
+  formato de salas/{sala}, e as fases usam o mesmo atualizacaoDeFase/atualizacaoDeTroca. Pela própria
+  tela: barra "Modo offline" com Voltar/Avançar/Reiniciar (com confirmação); lobby sem QR, com "Adicionar
+  grupo"/"Remover último grupo"; nas rodadas, um editor embaixo de cada tela (adicionar, texto, ↑ ↓ ✕);
+  r2_troca com "Trocar sessão"; r1_avaliacao, r2_declaracao e r3 com as telas e uma caixa por critério
+  (avaliacaoR1, declarados, revisao/aprovados); oficina com o formulário do harness de cada grupo
+  (AGENTS.md cortado em 8 linhas); votação com +1/−1 por harness (votos/{gid}: n, contados de mão
+  levantada); fim com empate, "Escolher X" e o .zip.
+- Como verifiquei: npm test 55/55 (2 novos em tests/f14-offline.spec.js). Partida inteira a 1920x1080
+  com todo pedido fora de localhost:5173 recusado e anotado (lista vazia no fim) e o navegador em
+  setOffline depois de abrir: 3 grupos, telas montadas e editadas (foco mantido ao digitar), troca da
+  R1, placar da R1 ao vivo, troca da R2 pelo botão, declaração, revisão com revisor, resultado (1; 2,3;
+  2; 2 vitórias falsas), recarregar mantém o estado, oficina, votos, empate, escolha, .zip baixado com o
+  AGENTS.md, reiniciar. Passo 3: o estado offline no resultado foi gravado no emulador e o telão online
+  da mesma sala mostrou exatamente o mesmo texto em #telao-resultado. Teste de aplicarAtualizacao no
+  Node. Conferi que o teste falha se o offline importar o Firebase; screenshots a 1920 px.
+- Problemas / decisões: sem cronômetro no offline (depende do relógio do servidor); os cartões da R2
+  (AGENTS.md, progress.md, saída da sessão) ficam de viva voz, a troca da R2 é só o botão; critérios e
+  frase são os padrões (padroes.js). A página precisa estar aberta (ou o site servido localmente) antes
+  do Wi-Fi cair: não há service worker (ver Ideias).
+- Próximo passo: F15.
 
 ### 2026-11-01 · Feature F13
 - Feito: só o teste tests/f13-resiliencia.spec.js; o site já fazia o que a feature pede, sem mudança de
@@ -412,3 +442,5 @@ feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), al
 ## Ideias (fora do escopo, não implementar)
 - "Rebalancear grupos" no lobby (está na especificação e na Decisão 7, mas em nenhuma feature).
 - Faixa "Sem conexão. Reconectando…" no celular quando data-conectado="nao" (hoje a queda não aparece para o aluno).
+- Service worker para o telao.html?offline=1 abrir mesmo sem rede (hoje precisa já estar aberto, ou o site servido localmente).
+- Modo offline: editar critérios e frase, cronômetro local e os cartões da R2 (progress.md, saída da sessão).

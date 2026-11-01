@@ -147,7 +147,7 @@
         "O apresentador cria os grupos, monta as telas e marca critérios pela própria tela",
         "O resultado R1 vs R2 e a vitória falsa aparecem como no modo online"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F15",

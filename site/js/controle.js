@@ -13,22 +13,14 @@ import {
 import { acompanharCronometro, agoraNoServidor } from './cronometro.js';
 import { contarMembros } from './grupos.js';
 import {
-  harnessesDaSala, contarVotos, lideres, vencedorDe, arquivosDoHarness, nomeDoZip,
+  harnessesDaSala, contarVotos, lideres, vencedorDe, baixarHarness,
 } from './harness.js';
-import { criarZip } from './zip.js';
 import { usarSala, adicionarBots } from './ensaio.js';
+import { FRASE_R1, TAMANHO_GRUPO_PADRAO, CRITERIOS_PADRAO } from './padroes.js';
 
 const BOTS_POR_VEZ = 20;
 
-export const FRASE_R1 = 'Monte a tela inicial de um app de caronas para alunos da UnB.';
-export const TAMANHO_GRUPO_PADRAO = 5;
-export const CRITERIOS_PADRAO = {
-  c1: 'O botão "Oferecer carona" é o primeiro componente da tela.',
-  c2: 'A lista de caronas mostra horário e ponto de saída em cada item (ex.: "18h · ICC Norte").',
-  c3: 'Existe um filtro por campus com Darcy Ribeiro, Gama, Ceilândia e Planaltina.',
-  c4: 'Não há componente de Chat nem de Pagamento (fora do escopo).',
-  c5: 'A tela tem no máximo 6 componentes.',
-};
+export { FRASE_R1, TAMANHO_GRUPO_PADRAO, CRITERIOS_PADRAO };
 
 const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // sem I e O, que confundem com 1 e 0
 
@@ -128,18 +120,7 @@ function desenharVotacao(fase, oficina, votos, alunos, grupos, escolhido) {
     return botao;
   }));
   $('botao-baixar-zip').disabled = !vencedor;
-  $('botao-baixar-zip').onclick = () => baixarZip(oficina[vencedor], grupos[vencedor]);
-}
-
-function baixarZip(harness, grupo) {
-  const url = URL.createObjectURL(new Blob([criarZip(arquivosDoHarness(harness, grupo))], { type: 'application/zip' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nomeDoZip(grupo);
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  $('botao-baixar-zip').onclick = () => baixarHarness(oficina[vencedor], grupos[vencedor]);
 }
 
 function desenharGrupos(grupos, alunos) {
