@@ -14,6 +14,57 @@ feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), al
 - Próximo passo:
 -->
 
+### Revisão 2026-11-01
+Revisor (não autor), sem código de feature. Escopo: F01 a F14 (passes: true). F15 continua false e não foi revisada.
+- Como revisei: li AGENTS.md, a especificação e feature_list.json; rodei ./init.sh (6/6 @fumaca) e npm test
+  (55/55, 3,0 min). Para cada step, li o teste que o cobre e conferi se ele prova o que o step diz. Repeti o
+  ./init.sh com as portas 9000, 9099 e 5173 livres (emuladores e servidor derrubados): subiu tudo e o
+  @fumaca passou. Screenshots com Playwright de todas as 12 fases (aluno e telão em 360x740 e 1920x1080,
+  controle em 1920x1080, mais o telão offline), numa sala com 2 alunos e 20 bots: zero erros no console.
+- Resultado: nenhuma feature reprovada. Testes que provam cada step:
+  - F01: fumaca.spec.js (portas no ar; 3 páginas sem erro no console; token alg "none" e WebSocket em
+    :9000; pages.yml publica site/). O step do ./init.sh também foi conferido à mão, do zero.
+  - F02: f02-controle.spec.js (login; "Criar sala" com 4 letras e fase lobby lida do banco; anônimo
+    negado em estado, segredo e update multi-caminho; leitura do segredo negada).
+  - F03: f03-alunos.spec.js (Auth anônimo conferido; 12 alunos em paralelo → 5/5/2 com nome, cor
+    e a cor do cartão; colegas; reload com o mesmo uid e sem membro duplicado).
+  - F04: f04-telao.spec.js (QR decodificado com jsQR = index.html?sala=; contagem ao vivo com marca
+    de "sem recarregar"; fontes ≥ 32 px).
+  - F05: f05-editor.spec.js (frase + moldura; os 10 tipos adicionados, editados, movidos, removidos e
+    conferidos no banco; sincronia com timeout de 2 s; regras com outro grupo/dono/fase; HTML igual
+    no celular e no telão).
+  - F06: f06-fases.spec.js (avançar, voltar e reiniciar; cronômetro com celular de relógio 3 min
+    adiantado; troca de tela em celulares e telão sem recarregar).
+  - F07: f07-troca.spec.js (um único evento "patch" no stream REST com fase, donos e trocas; aviso e
+    tela herdada; regras seguem o novo dono; 1 grupo).
+  - F08: f08-avaliacao.spec.js (cópia segredo → config; leitura negada em lobby/r1/r1_troca mesmo
+    com config/criterios gravado à força; marcação e média ao vivo no telão).
+  - F09: f09-rodada2.spec.js (tela nova e 3 cartões; saída bloqueada sem progress.md na UI e nas
+    regras; "X de N grupos prontos" e forçar; progress.md anterior acima da tela; declaração).
+  - F10: f10-revisao.spec.js (revisor ≠ autor e ≠ dono com 3 a 6 grupos, pela função e pelo controle;
+    nada do autor na tela antes de enviar; resultado R1 vs R2 com a vitória falsa em vermelho).
+  - F11: f11-oficina.spec.js (projeto da lista, AGENTS.md cortado em 8 linhas, 3 funcionalidades e
+    primeiro passo; voto único por uid, troca de voto, próprio grupo negado; contagem ao vivo; .zip
+    aberto e com os 3 arquivos conferidos).
+  - F12: f12-ensaio.spec.js (20 bots com 20 uids; partida lobby → fim com progress.md, avaliações,
+    revisões e 20 votos fora do próprio grupo; console vazio no controle e no telão).
+  - F13: f13-resiliencia.spec.js (queda real com setOffline + goOffline, volta sem recarregar na fase
+    nova; reabertura com o mesmo uid; entrada na r2 e depois da troca da r2).
+  - F14: f14-offline.spec.js (nenhum pedido fora de localhost:5173; partida inteira pela tela; o
+    resultado offline tem o mesmo texto do telão online com os mesmos dados).
+- Observações (não reprovam nada, ficam para o autor decidir):
+  - F10: o revisor não vê as marcações do autor na interface, mas `telas` tem ".read": "auth != null",
+    então quem abrir o console do navegador consegue ler `declarados` antes de enviar. O step e a
+    especificação falam só do que o revisor vê; as regras não pedem esse bloqueio.
+  - Nas screenshots, o telão a 360 px tem rolagem horizontal em 10 das 12 fases (scrollWidth até 468).
+    Não é requisito: o telão é para o projetor, e a F15 pede só 1920x1080. O aluno a 360 px não rolou na
+    horizontal em nenhuma fase, um bom sinal para a F15.
+  - Telão a 1920x1080 com 5 grupos cabe numa tela só na R1. Com 150 alunos (30 grupos) não foi medido;
+    é assunto da F15 (step 2).
+  - Para derrubar o servidor estático, `pkill -f "[h]ttp-server site"` não pega o processo; use
+    `fuser -k 5173/tcp`.
+- Próximo passo: F15 (a única com passes false).
+
 ### 2026-11-01 · Feature F14
 - Feito: telao.html?offline=1 carrega site/js/telao-offline.js por import dinâmico (o modo online
   continua carregando conexao.js e telao.js), então o modo offline não pede nada à internet: nem o SDK do
