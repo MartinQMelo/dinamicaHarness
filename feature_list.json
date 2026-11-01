@@ -137,7 +137,7 @@
         "Aluno que perde a conexão e volta continua no grupo e na fase atual",
         "Aluno que entra durante a r2 cai num grupo existente e vê a tela que o grupo tem agora"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F14",

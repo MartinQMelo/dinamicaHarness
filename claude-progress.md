@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F12 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
-feature_list.json (F13, reconexão e entrada atrasada). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
+F01 a F13 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
+feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
 ## Sessões
@@ -13,6 +13,27 @@ feature_list.json (F13, reconexão e entrada atrasada). Pontos de extensão: atu
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-11-01 · Feature F13
+- Feito: só o teste tests/f13-resiliencia.spec.js; o site já fazia o que a feature pede, sem mudança de
+  código. Reconexão: o uid anônimo fica salvo no navegador, a página lê alunos/{uid} ao abrir (se já
+  tem grupo, pula a tela de nome) e o SDK do Firebase reconecta sozinho e reenvia os onValue, então
+  fase e tela em mãos se atualizam. Entrada atrasada: entrarEmGrupo/escolherGrupo põem quem chega
+  depois do lobby no grupo com menos membros (Decisão 6) e o editor mostra telaDoGrupo (a tela que o
+  grupo tem agora, por dono).
+- Como verifiquei: npm test 53/53 (2 novos). Reconexão: Ana cai de verdade (setOffline do Playwright
+  mais goOffline do SDK, porque o modo offline do navegador não fecha um WebSocket aberto;
+  data-conectado="nao"); enquanto isso o Beto edita e o controle vai para a r1_troca, e a Ana não
+  fica sabendo. Ao voltar, sem recarregar: data-conectado="sim", fase r1_troca, grupo Azul, a tela
+  herdada do Beto, aviso de sessão, mesmo uid, continua editando. Depois fecha a aba, o controle vai
+  para a r1_avaliacao e ela reabre o link: cai direto na avaliação, sem pedir nome, mesmo uid, nenhum
+  aluno nem membro duplicado. Entrada atrasada: na r2 com Azul (2) e Verde (1), Caio entra, vai para o
+  Verde sem grupo novo e vê o editor com a tela da r2 do Verde, os cartões e o progress.md já
+  escritos; 360 px sem rolagem; edita e a Dani vê. Depois da troca forçada na r2_troca, Eva entra
+  (empate → Azul) e vê a tela que o Azul herdou, não a que escreveu, com o aviso de sessão.
+- Problemas / decisões: não há aviso visível de "sem conexão" no celular, só data-conectado no <html>
+  (a feature não pede; ver Ideias).
+- Próximo passo: a próxima feature com passes false.
 
 ### 2026-10-31 · Feature F12
 - Feito: site/js/entrada.js: entrarEmGrupo(db, sala, uid) saiu do aluno.js e recebe o banco de quem
@@ -390,3 +411,4 @@ feature_list.json (F13, reconexão e entrada atrasada). Pontos de extensão: atu
 
 ## Ideias (fora do escopo, não implementar)
 - "Rebalancear grupos" no lobby (está na especificação e na Decisão 7, mas em nenhuma feature).
+- Faixa "Sem conexão. Reconectando…" no celular quando data-conectado="nao" (hoje a queda não aparece para o aluno).
