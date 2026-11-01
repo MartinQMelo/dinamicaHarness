@@ -128,7 +128,7 @@
         "Os bots adicionam e editam componentes aleatórios nas fases de edição e preenchem progress.md, avaliações, revisões e votos",
         "Uma partida completa do lobby ao fim com 20 bots roda sem erro no console (teste e2e)"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "F13",

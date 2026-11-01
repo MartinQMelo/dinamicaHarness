@@ -16,6 +16,9 @@ import {
   harnessesDaSala, contarVotos, lideres, vencedorDe, arquivosDoHarness, nomeDoZip,
 } from './harness.js';
 import { criarZip } from './zip.js';
+import { usarSala, adicionarBots } from './ensaio.js';
+
+const BOTS_POR_VEZ = 20;
 
 export const FRASE_R1 = 'Monte a tela inicial de um app de caronas para alunos da UnB.';
 export const TAMANHO_GRUPO_PADRAO = 5;
@@ -252,6 +255,13 @@ function abrirSala(codigo) {
     if (TROCA_AO_ENTRAR.includes(proximaFase(fase))) executar(() => irParaFase(proximaFase(fase)));
   };
   $('botao-trocar-r2').onclick = () => executar(trocarSessaoR2);
+  usarSala(codigo, desenharBots);
+}
+
+function desenharBots(n) {
+  $('status-bots').textContent = n
+    ? `${n} ${n === 1 ? 'aluno falso jogando' : 'alunos falsos jogando'}. Eles param se este controle for fechado.`
+    : 'Alunos falsos são bots que entram na sala e jogam sozinhos enquanto este controle estiver aberto.';
 }
 
 export function iniciarControle() {
@@ -278,6 +288,15 @@ export function iniciarControle() {
       $('erro-painel').textContent = 'Não foi possível criar a sala. Confira se seu e-mail está cadastrado como admin.';
     } finally {
       $('botao-criar-sala').disabled = false;
+    }
+  });
+
+  $('botao-bots').addEventListener('click', async () => {
+    $('botao-bots').disabled = true;
+    try {
+      await adicionarBots(BOTS_POR_VEZ);
+    } finally {
+      $('botao-bots').disabled = false;
     }
   });
 

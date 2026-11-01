@@ -1,8 +1,8 @@
 # Progresso
 
 ## Estado atual
-F01 a F11 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
-feature_list.json (F12, modo ensaio com alunos-bot). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
+F01 a F12 prontas e verificadas (passes: true). Próximo passo: a próxima feature com passes false em
+feature_list.json (F13, reconexão e entrada atrasada). Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
 ## Sessões
@@ -13,6 +13,38 @@ feature_list.json (F12, modo ensaio com alunos-bot). Pontos de extensão: atuali
 - Problemas / decisões:
 - Próximo passo:
 -->
+
+### 2026-10-31 · Feature F12
+- Feito: site/js/entrada.js: entrarEmGrupo(db, sala, uid) saiu do aluno.js e recebe o banco de quem
+  entra (o celular e os bots usam a mesma transação). firebase-config.js › criarConexaoExtra(nome): outro
+  app do Firebase com Auth só na memória e a sua própria conexão com o banco (emulador em localhost).
+  site/js/bots.js (sem Firebase): acaoDoBot(sala, uid, sorteio) olha a sala inteira e devolve uma ação
+  que as regras deixam o grupo do bot fazer: r1/r1_troca e r2 editam a tela em mãos (mudancaAleatoria:
+  adiciona, edita com textos de carona, move, remove, sempre 3 a 8 componentes); r2 escreve o progress.md
+  e marca a feature_list; r2_troca antes da troca escreve o progress.md e sai (saiu {por, em}), depois da
+  troca edita a herdada; r1_avaliacao, r2_declaracao marcam critérios; r3 decide o que falta e envia;
+  oficina preenche um campo por vez; votacao vota num harness de outro grupo (às vezes troca). site/js/
+  ensaio.js: cada bot é um usuário anônimo de verdade com a sua conexão (grava pelas mesmas regras dos
+  alunos); o controle lê salas/{sala} inteira como admin e, a cada 200 ms, cada bot livre faz uma ação
+  (em média a cada 1,5 s). Gravação recusada só conta em falhasDosBots(). Bot que some de alunos
+  (Remover, Reiniciar sala) é desligado; abrir outra sala desliga todos. Nomes "Bot N" continuam a
+  numeração dos bots que já estão na sala. Controle: seção "Ensaio" com "Adicionar 20 alunos falsos" e
+  "N alunos falsos jogando".
+- Como verifiquei: npm test 51/51 (3 novos em tests/f12-ensaio.spec.js): teste de acaoDoBot no Node
+  (lobby/sem grupo → nada, tela herdada, progress.md antes de sair, espera depois de sair, revisão envia só
+  com tudo decidido, nunca vota no próprio grupo, 3 a 8 componentes); botão cria Bot 1..Bot 20, 20 uids
+  diferentes, cada um membro do seu grupo, 4 grupos de 5, controle e telão mostram; mais 20 continuam em
+  Bot 21..40; reiniciar desliga os bots. Partida completa com 20 bots, controle e telão abertos: telas
+  editadas na r1, mudadas depois da troca, avaliação, r2 com progress.md, "4 de 4 grupos prontos" e saiu
+  gravado por um bot do grupo dono, declaração, 4 revisões enviadas com os 5 critérios, telão no
+  resultado, 4 harnesses completos, 20 votos fora do próprio grupo, vencedor e .zip habilitado; zero
+  erros no console (controle e telão). Repeti o arquivo 2 vezes sem falha (~35 s por partida).
+- Problemas / decisões: os bots só vivem enquanto o controle que os criou está aberto (Auth na memória);
+  recarregar o controle deixa os bots na sala, parados. Numa partida medida houve 1 gravação recusada:
+  dois bots do mesmo grupo apertaram "Sair" juntos (a regra aceita um saiu só), como dois alunos
+  apertando ao mesmo tempo; aparece como FIREBASE WARNING (aviso, não erro). Os bots não gravam
+  editandoPor. No Firebase real, cada clique cria 20 contas anônimas (o Auth limita criações por IP).
+- Próximo passo: F13.
 
 ### 2026-10-31 · Feature F11
 - Feito: site/js/harness.js (sem Firebase): PROJETOS (chaves ru, caronas, provas, atletica), limites

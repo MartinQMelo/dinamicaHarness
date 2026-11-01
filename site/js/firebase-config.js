@@ -2,8 +2,10 @@
 // Troque os valores "COLE_AQUI" pelo objeto firebaseConfig do console
 // (Configurações do projeto → Seus apps → Web). Em localhost nada disso é usado:
 // a página conecta nos emuladores.
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-import { getAuth, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {
+  getAuth, initializeAuth, inMemoryPersistence, connectAuthEmulator,
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { getDatabase, connectDatabaseEmulator } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
 export const firebaseConfig = {
@@ -54,5 +56,19 @@ if (usaEmulador) {
 }
 
 document.documentElement.dataset.firebase = usaEmulador ? 'emulador' : configPreenchida ? 'real' : 'sem-config';
+
+// Outra conexão, com o seu próprio usuário (só na memória: some ao fechar a página). Usada pelos
+// alunos-bot do modo ensaio. fechar() desliga a conexão.
+export function criarConexaoExtra(nome) {
+  if (!app) return null;
+  const extra = initializeApp(app.options, nome);
+  const authExtra = initializeAuth(extra, { persistence: inMemoryPersistence });
+  const dbExtra = getDatabase(extra);
+  if (usaEmulador) {
+    connectAuthEmulator(authExtra, `http://${location.hostname}:9099`, { disableWarnings: true });
+    connectDatabaseEmulator(dbExtra, location.hostname, 9000);
+  }
+  return { auth: authExtra, db: dbExtra, fechar: () => deleteApp(extra) };
+}
 
 export { app, auth, db };

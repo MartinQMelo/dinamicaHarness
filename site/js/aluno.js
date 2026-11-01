@@ -1,10 +1,10 @@
 // Tela do aluno: entrada com nome, Auth anônimo e distribuição em grupos.
 import { signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
-  ref, get, set, onValue, runTransaction, serverTimestamp,
+  ref, get, set, onValue, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 import { auth, db } from './firebase-config.js';
-import { escolherGrupo, dadosDoGrupo, contarMembros } from './grupos.js';
+import { entrarEmGrupo } from './entrada.js';
 import { criarEditor } from './editor.js';
 import { criarAvaliacao } from './avaliacao.js';
 import { criarCartoes } from './cartoes.js';
@@ -33,37 +33,6 @@ function esperarUsuario() {
   return new Promise((resolve) => {
     const parar = onAuthStateChanged(auth, (user) => { parar(); resolve(user); });
   });
-}
-
-// Coloca o aluno num grupo com transação, para dois alunos simultâneos não estourarem o limite.
-async function entrarEmGrupo(sala, uid) {
-  const raiz = `salas/${sala}`;
-  for (let tentativa = 0; tentativa < 30; tentativa++) {
-    const [grupos, tamanhoGrupo, estado] = (await Promise.all([
-      get(ref(db, `${raiz}/grupos`)), get(ref(db, `${raiz}/config/tamanhoGrupo`)), get(ref(db, `${raiz}/estado`)),
-    ])).map((s) => s.val());
-    const jaMembro = Object.entries(grupos || {}).find(([, g]) => g.membros?.[uid]);
-    if (jaMembro) return jaMembro[0];
-
-    const tamanho = tamanhoGrupo || 5;
-    const escolha = escolherGrupo(grupos, tamanho, estado?.fase);
-    if (!escolha) throw new Error('sem-grupo');
-
-    let resultado;
-    try {
-      resultado = await runTransaction(ref(db, `${raiz}/grupos/${escolha.gid}`), (atual) => {
-        // null pode ser só o cache local vazio: propor a criação faz o servidor mandar o valor real.
-        if (!atual) return { ...dadosDoGrupo(escolha.ordem), membros: { [uid]: true } };
-        if (atual.membros?.[uid]) return; // já está
-        if (estado?.fase === 'lobby' && contarMembros(atual) >= tamanho) return; // lotou: escolhe de novo
-        return { ...atual, membros: { ...atual.membros, [uid]: true } };
-      }, { applyLocally: false });
-    } catch {
-      continue; // regras recusaram (ex.: criar grupo fora do lobby): escolhe de novo
-    }
-    if (resultado.snapshot.child(`membros/${uid}`).val() === true) return escolha.gid;
-  }
-  throw new Error('sem-grupo');
 }
 
 function acompanharGrupo(sala, uid, gid) {
@@ -170,7 +139,7 @@ export async function iniciarAluno() {
     $('erro-entrada').textContent = '';
     $('botao-entrar').disabled = true;
     try {
-      const gid = await entrarEmGrupo(sala, user.uid);
+      const gid = await entrarEmGrupo(db, sala, user.uid);
       const aluno = { nome, grupo: gid, entrouEm: serverTimestamp() };
       await set(ref(db, `salas/${sala}/alunos/${user.uid}`), aluno);
       mostrarGrupo(sala, user.uid, aluno);
