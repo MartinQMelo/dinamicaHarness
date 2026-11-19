@@ -1,7 +1,6 @@
-// Configuração do Firebase. Não é segredo: pode ficar no repositório.
-// Troque os valores "COLE_AQUI" pelo objeto firebaseConfig do console
-// (Configurações do projeto → Seus apps → Web). Em localhost nada disso é usado:
-// a página conecta nos emuladores.
+// Configuração do Firebase (projeto dinamica-harness). Não é segredo: pode ficar no repositório;
+// quem protege os dados são as regras do banco. Em localhost nada disso é usado: a página conecta
+// nos emuladores.
 import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   getAuth, initializeAuth, inMemoryPersistence, connectAuthEmulator,
@@ -9,13 +8,13 @@ import {
 import { getDatabase, connectDatabaseEmulator } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
 export const firebaseConfig = {
-  apiKey: 'COLE_AQUI',
-  authDomain: 'COLE_AQUI',
-  databaseURL: 'COLE_AQUI',
-  projectId: 'COLE_AQUI',
-  storageBucket: 'COLE_AQUI',
-  messagingSenderId: 'COLE_AQUI',
-  appId: 'COLE_AQUI',
+  apiKey: 'AIzaSyBhOGuFuEGJGrucRUX-oeW27ksHbmfU60E',
+  authDomain: 'dinamica-harness.firebaseapp.com',
+  databaseURL: 'https://dinamica-harness-default-rtdb.firebaseio.com',
+  projectId: 'dinamica-harness',
+  storageBucket: 'dinamica-harness.firebasestorage.app',
+  messagingSenderId: '642131877948',
+  appId: '1:642131877948:web:247db1df2736c729a02339',
 };
 
 const PROJETO_EMULADOR = 'demo-dinamica';
