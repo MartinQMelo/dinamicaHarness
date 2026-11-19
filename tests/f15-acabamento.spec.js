@@ -45,8 +45,9 @@ function esperarSala(sala, condicao, timeout = 60_000) {
 }
 
 const telasDa = (s, rodada) => Object.values(s.telas || {}).filter((t) => t.rodada === rodada);
-// As 4 telas dos grupos de bots com pelo menos 5 componentes (a da aluna, sozinha, fica com o que ela fez).
-const cheias = (s, rodada) => telasDa(s, rodada).filter((t) => listaDeComponentes(t.componentes).length >= 5).length >= 4;
+// As 4 telas dos grupos de bots já preenchidas (a da aluna, sozinha, fica com o que ela fez). Os bots
+// oscilam entre 3 e 8 componentes: exigir mais que 3 nas 4 ao mesmo tempo às vezes passa de 60 s.
+const cheias = (s, rodada) => telasDa(s, rodada).filter((t) => listaDeComponentes(t.componentes).length >= 3).length >= 4;
 
 // Mede a página: largura e altura do documento e a seção que está à vista.
 const medir = (page) => page.evaluate(() => {
