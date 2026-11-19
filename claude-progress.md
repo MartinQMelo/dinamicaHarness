@@ -5,6 +5,53 @@ F01 a F15 prontas e verificadas (passes: true). Próximo passo: a próxima featu
 feature_list.json. Pontos de extensão: atualizacaoDeFase (site/js/fases.js), aluno.js
 (uma seção por fase) e telao.js (uma seção por fase).
 
+## Revisão 2026-11-19
+Revisão das features com passes true (F01–F15), sem código de feature.
+**Conflito de interesse:** este revisor escreveu a F13 e a F15 numa sessão anterior. A revisão delas não
+é independente; por isso foram lidas com mais rigor, mas vale uma segunda revisão por outro agente.
+- Como revisei: li AGENTS.md, a especificação e feature_list.json; `./init.sh` (6/6 @fumaca) e
+  `npm test` (58/58, 4,7 min). Casei cada step com o teste abaixo e conferi as asserções que provam o
+  step (ex.: F07 conta 1 evento 'patch' no stream do banco; F06 usa um celular com relógio adiantado;
+  F14 compara o innerText do resultado offline com o do telão online; F15 mede a altura renderizada,
+  já com o zoom, do título e dos números). Nenhuma regra `overflow: hidden` mascara a medida de
+  rolagem lateral (procurei no CSS).
+- Screenshots: roteiro próprio, fora do repositório, com Playwright no emulador: partida inteira com 2
+  alunas reais + 20 bots, uma foto por fase (12 fases, mais o antes e o depois da troca da r2) do
+  celular em 360x740 (as duas alunas, mais a tela de entrada), do telão em 1920x1080 e do controle em
+  1920x1080, mais o telão offline. Resultado: celular sempre com 360 px de largura, telão sempre com
+  1920x1080 (sem rolagem), zero erros no console. As fotos ficaram fora do repositório.
+- **Resultado: nenhuma feature reprovada.** Nenhum passes voltou para false.
+
+| Feature | Testes que provam os steps |
+| --- | --- |
+| F01 | `fumaca.spec.js`: serviços no ar (1), 3 páginas sem erro no console (2), emuladores em localhost (3), pages.yml publica `site/` (4). |
+| F02 | `f02-controle.spec.js`: login (1), "Criar sala" com 4 letras e lobby (2), anônimo não grava estado/segredo (3), não lê segredo (4). |
+| F03 | `f03-alunos.spec.js`: entrada anônima (1), 12 alunos → 5/5/2 com cor e nome (2), grupo e colegas no celular (3), recarregar mantém o grupo (4). |
+| F04 | `f04-telao.spec.js`: QR decodificado com jsQR (1), contagem ao vivo (2), números ≥ 32 px (3). |
+| F05 | `f05-editor.spec.js`: frase e moldura (1), 10 tipos (2), < 2 s entre colegas (3), regras negam tela alheia (4), mesmo HTML no celular e no telão (5). |
+| F06 | `f06-fases.spec.js`: fase e botões (1), cronômetro sincronizado, inclusive com relógio errado (2), celulares mudam sem recarregar (3). |
+| F07 | `f07-troca.spec.js`: troca num único evento (1), aviso e tela herdada (2), 1 grupo (3). |
+| F08 | `f08-avaliacao.spec.js`: cópia segredo → config (1), leitura negada antes (2), marcação (3), média no telão (4). |
+| F09 | `f09-rodada2.spec.js`: tela nova e cartões (1), saída só com progress.md, contagem e "Forçar troca" (2), progress.md em destaque (3), declaração (4). |
+| F10 | `f10-revisao.spec.js`: revisor ≠ autor ≠ dono (1), marcações escondidas até enviar (2), R1 vs R2 com vitória falsa (3). |
+| F11 | `f11-oficina.spec.js`: oficina (1), voto único/troca/nunca no próprio grupo (2), telão ao vivo (3), .zip conferido (4). |
+| F12 | `f12-ensaio.spec.js`: botão cria 20 bots (1), bots editam/preenchem/avaliam/revisam/votam (2), partida completa sem erro (3). |
+| F13 | `f13-resiliencia.spec.js`: queda real (goOffline + setOffline) e volta no grupo e na fase, também reabrindo a aba (1); entrada na r2 vê a tela atual do grupo (2). |
+| F14 | `f14-offline.spec.js`: as fases sem Firebase (1), apresentador faz tudo pela tela (2), resultado igual ao online (3). |
+| F15 | `f15-acabamento.spec.js`: 360x740 nas 12 fases (1); 1920x1080 nas 12 fases e com 12 grupos (2); Lighthouse 100 em 4 estados do index.html (3). |
+
+Observações (não reprovam, porque nenhum step pede isto; ficam para o apresentador decidir ou para "Ideias"):
+- Telão na r2_troca: o rótulo "grupos prontos" ao lado de "3 de 3" tem ~16 px, ilegível do fundo da
+  sala. O teste da F15 só mede o título e os números.
+- O teste da F04 (números ≥ 32 px) mede o font-size calculado, que ignora o zoom do caber.js. Quem
+  prova o tamanho na tela com muitos grupos é o teste da F15, com 12 grupos.
+- Nenhum teste mede a rolagem lateral da tela de entrada (antes de digitar o nome); a F15 mede o lobby
+  já com o aluno no grupo. No roteiro desta revisão a tela de entrada tem 360 px.
+- Celular no resultado mostra a tela do lobby com "Aguarde o apresentador começar." (já anotado em
+  2026-11-01; continua).
+- `telas/{tid}/declarados` continua legível por qualquer autenticado na r3 (já anotado; a interface
+  esconde, que é o que o step da F10 pede).
+
 ## Revisão 2026-11-01
 Revisão das features com passes true (F01–F14): para cada step, o teste que o prova, lido e rodado.
 `./init.sh` e `npm test` (55/55) passaram. **Nenhuma feature reprovada**; nenhum passes voltou para false.
