@@ -4,7 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Telão · Você é o agente</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="img/milani-simbolo-cor.svg" type="image/svg+xml">
+  <!-- O modo offline pode perder a rede depois de abrir: as fontes vêm todas já na abertura. -->
+  <link rel="preload" href="fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/base.css">
 </head>
 <body class="telao">
@@ -16,6 +20,10 @@
       <button id="offline-avancar" type="button">Avançar fase ▶</button>
       <button id="offline-reiniciar" type="button" class="secundario">Reiniciar</button>
     </nav>
+    <header class="topo">
+      <img src="img/milani-simbolo-branco.svg" alt="" width="34" height="22">
+      <span>Milani</span><span class="topo-barra" aria-hidden="true">/</span><span>Harness engineering · Samsung Ocean · UnB</span>
+    </header>
     <h1>Você é o agente</h1>
     <p id="cronometro" class="cronometro telao-cronometro" hidden></p>
 

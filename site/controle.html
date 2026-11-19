@@ -4,11 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Controle · Você é o agente</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="img/milani-simbolo-cor.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/base.css">
 </head>
-<body>
+<body class="controle">
   <main>
+    <header class="topo">
+      <img src="img/milani-simbolo-cor.svg" alt="" width="34" height="22">
+      <span>Milani</span><span class="topo-barra" aria-hidden="true">/</span><span>Apresentador</span>
+    </header>
     <h1>Controle da dinâmica</h1>
 
     <section id="tela-login" hidden>
@@ -30,9 +35,11 @@
       <button id="botao-criar-sala" type="button" disabled>Criar sala</button>
       <p id="erro-painel" class="erro" role="alert"></p>
       <div id="sala-criada" hidden>
-        <p>Sala criada: <strong id="sala-codigo" class="codigo-sala"></strong></p>
-        <p>Link dos alunos: <span id="link-aluno"></span></p>
-        <p><a id="link-telao" target="_blank" rel="noopener">Abrir o telão</a></p>
+        <div class="sala-dados">
+          <p>Sala criada: <strong id="sala-codigo" class="codigo-sala"></strong></p>
+          <p>Link dos alunos: <span id="link-aluno"></span></p>
+          <p><a id="link-telao" target="_blank" rel="noopener">Abrir o telão</a></p>
+        </div>
 
         <h2>Fase</h2>
         <p>Fase atual: <strong id="fase-atual" class="fase-atual"></strong></p>
